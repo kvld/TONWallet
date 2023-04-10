@@ -1,6 +1,0 @@
-framework module RLottie {
-  header "rlottie_capi.h"
-  header "rlottiecommon.h"
-
-  export *
-}

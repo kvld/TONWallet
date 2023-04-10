@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import RLottie
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {

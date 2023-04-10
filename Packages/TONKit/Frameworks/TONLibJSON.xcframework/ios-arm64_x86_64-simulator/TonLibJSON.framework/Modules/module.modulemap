@@ -1,0 +1,6 @@
+framework module TonLibJSON {
+  header "tonlib/tonlib_client_json.h"
+  header "tonlib/tonlibjson_export.h"
+
+  export *
+}
