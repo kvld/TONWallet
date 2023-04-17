@@ -66,28 +66,43 @@ public final class TONClient {
 extension TONClient {
     public func execute<Function: TLFunction>(
         _ function: Function,
-        timeout: TimeInterval? = nil
+        timeout: Timeout = .inherited
     ) async throws -> Function.ReturnType {
-        let timeout = timeout ?? self.timeout
         let uuid = UUID()
 
+        if case .infinite = timeout {
+            return try await self.execute(function, uuid: uuid)
+        }
+
         return try await withThrowingTaskGroup(of: Function.ReturnType.self) { group in
+            let deadline: Date = {
+                switch timeout {
+                case .inherited:
+                    return Date(timeIntervalSinceNow: self.timeout)
+                case .custom(let timeInterval):
+                    return Date(timeIntervalSinceNow: timeInterval)
+                case .infinite:
+                    assertionFailure("Request without timeout should be executed in single")
+                    return Date()
+                }
+            }()
+
             group.addTask {
-                return try await self.execute(function, uuid: uuid)
+                try await self.execute(function, uuid: uuid)
             }
 
             group.addTask {
-                try await Task.sleep(nanoseconds: UInt64(timeout) * 1_000_000_000)
-                try Task.checkCancellation()
+                let interval = deadline.timeIntervalSinceNow
 
+                if interval > 0 {
+                    try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                }
+                
                 throw TimeoutError()
             }
 
-            guard let result = try await group.next() else {
-                assertionFailure("Error should be thrown already")
-                throw TimeoutError()
-            }
-
+            // TODO: fix timeout rethrows
+            let result = try await group.next()!
             group.cancelAll()
 
             return result
@@ -131,3 +146,22 @@ extension TONClient {
     }
 }
 
+extension TONClient {
+    public enum Timeout: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+        public typealias FloatLiteralType = TimeInterval
+
+        public typealias IntegerLiteralType = TimeInterval
+
+        case inherited
+        case custom(TimeInterval)
+        case infinite
+
+        public init(integerLiteral value: TimeInterval) {
+            self = .custom(value)
+        }
+
+        public init(floatLiteral value: TimeInterval) {
+            self = .custom(value)
+        }
+    }
+}

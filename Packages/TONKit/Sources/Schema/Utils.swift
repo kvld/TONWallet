@@ -23,7 +23,11 @@ enum TLTypedCodingKey: String, CodingKey {
 public struct TLTypedUnknownTypeError: Swift.Error { }
 
 public struct TLInt64: Codable {
-    private(set) var value: Swift.Int64
+    private(set) public var value: Swift.Int64
+
+    public init(_ value: Swift.Int64) {
+        self.value = value
+    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

@@ -1,6 +1,6 @@
 import Foundation
 
-public typealias Int53 = Int64
+public typealias Int53 = Swift.Int64
 public typealias Int64 = TLInt64
 public typealias Int256 = Int64
 public typealias Bytes = Foundation.Data

@@ -34,11 +34,17 @@ let package = Package(
             dependencies: [],
             path: "Sources/Schema"
         ),
+        .target(
+            name: "BOC",
+            dependencies: [],
+            path: "Sources/BOC"
+        ),
         .executableTarget(
             name: "TONPlayground",
             dependencies: [
                 "TONClient",
-                "TONSchema"
+                "TONSchema",
+                "BOC"
             ],
             path: "Sources/Playground"
         ),
