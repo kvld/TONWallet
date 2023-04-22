@@ -10,7 +10,7 @@ public final class TONClient {
     private let client: UnsafeMutableRawPointer
     private let timeout: TimeInterval
 
-    private var executingFunctions: [UUID: (Result<Decoder, Error>) -> Void] = [:]
+    private var executingFunctions: [UUID: (Result<Decoder, Swift.Error>) -> Void] = [:]
 
     private lazy var executingFunctionsQueue = DispatchQueue(
         label: "TONClientExecutingFunctionsQueue",
@@ -65,48 +65,10 @@ public final class TONClient {
 
 extension TONClient {
     public func execute<Function: TLFunction>(
-        _ function: Function,
-        timeout: Timeout = .inherited
+        _ function: Function
     ) async throws -> Function.ReturnType {
         let uuid = UUID()
-
-        if case .infinite = timeout {
-            return try await self.execute(function, uuid: uuid)
-        }
-
-        return try await withThrowingTaskGroup(of: Function.ReturnType.self) { group in
-            let deadline: Date = {
-                switch timeout {
-                case .inherited:
-                    return Date(timeIntervalSinceNow: self.timeout)
-                case .custom(let timeInterval):
-                    return Date(timeIntervalSinceNow: timeInterval)
-                case .infinite:
-                    assertionFailure("Request without timeout should be executed in single")
-                    return Date()
-                }
-            }()
-
-            group.addTask {
-                try await self.execute(function, uuid: uuid)
-            }
-
-            group.addTask {
-                let interval = deadline.timeIntervalSinceNow
-
-                if interval > 0 {
-                    try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
-                }
-                
-                throw TimeoutError()
-            }
-
-            // TODO: fix timeout rethrows
-            let result = try await group.next()!
-            group.cancelAll()
-
-            return result
-        }
+        return try await self.execute(function, uuid: uuid)
     }
 
     private func execute<Function: TLFunction>(
@@ -142,26 +104,6 @@ extension TONClient {
             String(data: json, encoding: .utf8)?.withCString { pointer in
                 tonlib_client_json_send(client, pointer)
             }
-        }
-    }
-}
-
-extension TONClient {
-    public enum Timeout: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
-        public typealias FloatLiteralType = TimeInterval
-
-        public typealias IntegerLiteralType = TimeInterval
-
-        case inherited
-        case custom(TimeInterval)
-        case infinite
-
-        public init(integerLiteral value: TimeInterval) {
-            self = .custom(value)
-        }
-
-        public init(floatLiteral value: TimeInterval) {
-            self = .custom(value)
         }
     }
 }

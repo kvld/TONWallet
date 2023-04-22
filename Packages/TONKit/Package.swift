@@ -39,12 +39,18 @@ let package = Package(
             dependencies: [],
             path: "Sources/BOC"
         ),
+        .target(
+            name: "Mnemonic",
+            dependencies: [],
+            path: "Sources/Mnemonic"
+        ),
         .executableTarget(
             name: "TONPlayground",
             dependencies: [
                 "TONClient",
                 "TONSchema",
-                "BOC"
+                "BOC",
+                "Mnemonic"
             ],
             path: "Sources/Playground"
         ),

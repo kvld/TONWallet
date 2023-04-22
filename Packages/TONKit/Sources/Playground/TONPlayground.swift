@@ -6,6 +6,7 @@ import Foundation
 import TONClient
 import TONSchema
 import BOC
+import Mnemonic
 
 @main
 final class TONPlayground {
@@ -68,7 +69,7 @@ final class TONPlayground {
         )
 
         do {
-            let transactions = try await client.execute(request2, timeout: .infinite)
+            let transactions = try await client.execute(request2)
             print(transactions)
         } catch {
             print(error)

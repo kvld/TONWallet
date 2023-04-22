@@ -32,4 +32,5 @@ do
     lipo -remove i386 "iOS-simulator/lib/${lib}.a" -o "iOS-simulator/lib/${lib}.a"
 done
 
+cd ..
 rm Build-OpenSSL-cURL
