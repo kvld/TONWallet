@@ -15,11 +15,19 @@ final class WizardReadyRouter: HostingRouter<AnyView, WizardInfoModule> {
                 animationName: "start",
                 title: "Ready to go!",
                 text: "You are all set. Now you have a wallet that only you control — directly, without middlemen or bankers.",
-                primaryButton: .init(title: "View my wallet", action: onClose),
+                primaryButton: Self.makePrimaryButton(onClose: onClose),
                 secondaryButton: nil
             )
         )
 
         super.init(view: module.view, module: module)
+    }
+
+    private static func makePrimaryButton(onClose: @escaping () -> Void) -> AnyView {
+        Button("View my wallet") {
+            onClose()
+        }
+        .buttonStyle(.action())
+        .eraseToAnyView()
     }
 }

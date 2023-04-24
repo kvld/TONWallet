@@ -6,9 +6,20 @@ import Foundation
 import Security
 import CommonCrypto
 import CryptoKit
+import Sodium
 
 public struct MnemonicGeneratorError: Error {
     let message: String
+}
+
+public struct PrivateKey {
+    public let data: Data
+
+    public var publicKey: Data {
+        get throws {
+            try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: data).publicKey.rawRepresentation
+        }
+    }
 }
 
 public struct MnemonicGenerator {
@@ -64,6 +75,17 @@ public struct MnemonicGenerator {
         }
 
         return try await generationTask.value
+    }
+
+    public func generateKeyPair(from seed: Data) async throws -> (publicKey: PrivateKey, secretKey: Data) {
+        return try await Task {
+            guard let keyPair = Sodium().sign.keyPair(seed: Array(seed)) else {
+                throw MnemonicGeneratorError(message: "Invalid key pair generation")
+            }
+
+            return (PrivateKey(data: Data(keyPair.publicKey)), Data(keyPair.secretKey))
+        }
+        .value
     }
 
     public func generateMnemonic(password: String = "") async throws -> [String] {

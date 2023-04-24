@@ -5,6 +5,7 @@
 import UIKit
 import SwiftUI
 
+@MainActor
 public protocol Router {
     var viewController: UIViewController { get }
     var canDismissInteractively: Bool { get }

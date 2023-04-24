@@ -14,23 +14,20 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../Main"),
-
-        .package(path: "../WizardInfo"),
-        .package(path: "../WizardMnemonicInput"),
-        .package(path: "../WizardMnemonic"),
-        .package(path: "../WizardPasscode"),
-        .package(path: "../WizardBiometric"),
+        .package(path: "../Wizard")
     ],
     targets: [
         .target(
             name: "Routing",
             dependencies: [
                 .product(name: "Main", package: "Main"),
-                .product(name: "WizardInfo", package: "WizardInfo"),
-                .product(name: "WizardMnemonicInput", package: "WizardMnemonicInput"),
-                .product(name: "WizardMnemonic", package: "WizardMnemonic"),
-                .product(name: "WizardPasscode", package: "WizardPasscode"),
-                .product(name: "WizardBiometric", package: "WizardBiometric"),
+                .product(name: "WizardInfo", package: "Wizard"),
+                .product(name: "WizardMnemonicInput", package: "Wizard"),
+                .product(name: "WizardMnemonic", package: "Wizard"),
+                .product(name: "WizardPasscode", package: "Wizard"),
+                .product(name: "WizardBiometric", package: "Wizard"),
+                .product(name: "WizardState", package: "Wizard"),
+                .product(name: "WizardInitial", package: "Wizard")
             ],
             path: "Sources/"
         )

@@ -45,8 +45,8 @@ public final class Cell {
     }
 
     public func serializeAsBoC(
-        hasIdx: Bool = true,
-        hasCRC32: Bool = true,
+        hasIdx: Bool = false,
+        hasCRC32: Bool = false,
         hasCacheBits: Bool = false,
         flags: UInt8 = 0
     ) throws -> Data {

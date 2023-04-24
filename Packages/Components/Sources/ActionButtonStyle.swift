@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import SwiftUIHelpers
 
 public enum ActionButtonBackground {
     case filled
@@ -32,6 +33,9 @@ public struct ActionButtonStyle: ButtonStyle {
     private let background: ActionButtonBackground
     private let color: ActionButtonColor
 
+    @Environment(\.isLoading) var isLoading
+    @Environment(\.isEnabled) var isEnabled
+
     private var textColor: Color {
         switch background {
         case .filled:
@@ -59,14 +63,28 @@ public struct ActionButtonStyle: ButtonStyle {
         VStack(spacing: 0) {
             Spacer()
 
-            HStack(spacing: 0) {
-                Spacer(minLength: 4)
+            ZStack {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 4)
 
-                configuration.label
-                    .fontConfiguration(.body.semibold)
-                    .foregroundColor(textColor)
+                    configuration.label
+                        .fontConfiguration(.body.semibold)
+                        .foregroundColor(textColor)
+                        .padding(.bottom, 2)
 
-                Spacer(minLength: 4)
+                    Spacer(minLength: 4)
+                }
+
+                if isLoading {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        
+                        LoadingIndicator(lineWidth: 2.3)
+                            .foregroundColor(textColor)
+                            .frame(width: 16, height: 16)
+                            .padding(.trailing, 16)
+                    }
+                }
             }
 
             Spacer()
@@ -75,6 +93,8 @@ public struct ActionButtonStyle: ButtonStyle {
         .background(backgroundColor)
         .cornerRadius(12)
         .opacity(configuration.isPressed ? 0.6 : 1.0)
+        .opacity(isEnabled ? 1.0 : 0.4)
+        .allowsHitTesting(isEnabled)
     }
 }
 

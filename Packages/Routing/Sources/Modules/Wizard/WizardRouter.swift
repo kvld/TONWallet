@@ -4,32 +4,29 @@
 
 import Foundation
 import SwiftUI
-
+import WizardState
 import WizardInfo
 
-final class WizardRouter: Router {
+@MainActor
+final class WizardRouter: Router, WizardViewModelOutput {
     private let _navigationRouter: NavigationRouter
     private let transitioningDelegate: WizardTransitioningDelegate
     private weak var parentNavigationRouter: NavigationRouter?
+
+    private let viewModel: WizardViewModel
 
     var viewController: UIViewController {
         _navigationRouter.viewController
     }
 
-    init(parentNavigationRouter: NavigationRouter) {
+    init(viewModel: WizardViewModel, parentNavigationRouter: NavigationRouter) {
         let transitioningDelegate = WizardTransitioningDelegate()
 
         let navigationRouter = NavigationRouter { controller in
             controller.navigationBar.isHidden = true
         }
 
-        var onCreateWallet: (() -> Void)?
-        var onImportWallet: (() -> Void)?
-        
-        let wizardInitialRouter = WizardInitialRouter(
-            onCreateWallet: { onCreateWallet?() },
-            onImportWallet: { onImportWallet?() }
-        )
+        let wizardInitialRouter = WizardInitialRouter(viewModel: viewModel)
 
         navigationRouter.embed(router: wizardInitialRouter)
 
@@ -39,80 +36,80 @@ final class WizardRouter: Router {
         self._navigationRouter = navigationRouter
         self.transitioningDelegate = transitioningDelegate
         self.parentNavigationRouter = parentNavigationRouter
+        self.viewModel = viewModel
 
-        onCreateWallet = { [weak self] in
-            self?.showCongratulations()
-        }
-
-        onImportWallet = { [weak self] in
-            self?.showFinal()
-//            self?.showImport()
-        }
+        viewModel.output = self
     }
 
     func showCongratulations() {
-        let router = WizardCongratulationsRouter(
-            onShowMnemonicWords: { [weak self] in
-                self?.showMnemonicWordsList()
-            }
-        )
-
+        let router = WizardCongratulationsRouter(viewModel: viewModel)
         _navigationRouter.push(router: router)
     }
 
     func showImport() {
-        let router = WizardMnemonicInputRouter(
-            state: .import(count: 24), // TODO: magic const
-            onComplete: {
-                // TODO: after import
-            },
-            onForgotWords: { [weak self] in
-                self?.showForgotMnemonicWords()
-            }
-        )
-
+        let router = WizardMnemonicInputRouter(state: .import, viewModel: viewModel)
         _navigationRouter.push(router: router)
     }
 
     func showMnemonicWordsList() {
-        let router = WizardMnemonicRouter(
-            onComplete: { [weak self] in
-                self?.showMnemonicWordsTest()
-            }
+        let router = WizardMnemonicRouter(viewModel: viewModel)
+        _navigationRouter.push(router: router)
+    }
+
+    func showMnemonicWordsTooFastAlert(canSkip: Bool) {
+        var actions: [UIAlertAction] = [
+            .init(title: "OK, sorry", style: .cancel)
+        ]
+
+        if canSkip {
+            actions.append(
+                .init(title: "Skip", style: .default) { [weak self] _ in
+                    self?.showMnemonicWordsTest()
+                }
+            )
+        }
+
+        let router = AlertRouter(
+            title: "Sure done?",
+            message: "You didn't have enough time to write these words down.",
+            actions: actions
         )
 
-        _navigationRouter.push(router: router)
+        _navigationRouter.present(router: router)
     }
 
     func showMnemonicWordsTest() {
-        let router = WizardMnemonicInputRouter(
-            state: .test(indices: [5, 17, 19]),
-            onComplete: { [weak self] in
-                self?.showPasscodeSetUp()
-            },
-            onForgotWords: { }
-        )
-
+        let router = WizardMnemonicInputRouter(state: .test, viewModel: viewModel)
         _navigationRouter.push(router: router)
     }
 
-    func showPasscodeSetUp() {
-        let router = WizardPasscodeRouter(
-            isInConfirmationMode: false
-        ) { [weak self] in
-            self?.showPasscodeConfirmation()
-        }
+    func showFailedTestAlert() {
+        let actions: [UIAlertAction] = [
+            .init(title: "See words", style: .default) { [weak _navigationRouter] _ in
+                _navigationRouter?.dismissTopmost()
+                _navigationRouter?.popTopmost()
+            },
+            .init(title: "Try again", style: .default) { [weak _navigationRouter] _ in
+                _navigationRouter?.dismissTopmost()
+            }
+        ]
 
+        let router = AlertRouter(
+            title: "Incorrect words",
+            message: "The secret words you have entered do not match the ones in the list.",
+            actions: actions
+        )
+
+        _navigationRouter.present(router: router)
+    }
+
+    func showPasscodeSetUp() {
+        let router = WizardPasscodeRouter(isInConfirmationMode: false, viewModel: viewModel)
         _navigationRouter.push(router: router)
     }
 
     func showPasscodeConfirmation() {
-        let router = WizardPasscodeRouter(
-            isInConfirmationMode: true
-        ) { [weak self] in
-            self?.showBiometric()
-        }
-
+        let router = WizardPasscodeRouter(isInConfirmationMode: true, viewModel: viewModel)
         _navigationRouter.push(router: router)
     }
 

@@ -20,13 +20,10 @@
 		4617F60D29E2B812000A6B7B /* TONKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TONKit; path = Packages/TONKit; sourceTree = "<group>"; };
 		46329A4D29D884CA009B7203 /* RLottie.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = RLottie.xcframework; path = Packages/AnimationView/Frameworks/RLottie.xcframework; sourceTree = "<group>"; };
 		4660816129D42BF40027C282 /* Components */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Components; path = Packages/Components; sourceTree = "<group>"; };
-		4684B98629D9666E0048B451 /* WizardMnemonicInput */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WizardMnemonicInput; path = Packages/WizardMnemonicInput; sourceTree = "<group>"; };
-		469EBDA729D99D4C00FC5CEA /* WizardBiometric */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WizardBiometric; path = Packages/WizardBiometric; sourceTree = "<group>"; };
-		46AC705329D96F460082B26E /* WizardPasscode */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WizardPasscode; path = Packages/WizardPasscode; sourceTree = "<group>"; };
+		4662C76029F4761500D77E64 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Services; path = Packages/Services; sourceTree = "<group>"; };
+		4662C76129F51F7200D77E64 /* Wizard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Wizard; path = Packages/Wizard; sourceTree = "<group>"; };
 		46ACDC7429D404D70020AF32 /* AnimationView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationView; path = Packages/AnimationView; sourceTree = "<group>"; };
 		46AE1D8E29CDA617006A184E /* SwiftUIUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftUIUtils; path = Packages/SwiftUIUtils; sourceTree = "<group>"; };
-		46C5BEFC29D959AD0067C1F0 /* WizardInfo */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WizardInfo; path = Packages/WizardInfo; sourceTree = "<group>"; };
-		46C5BEFD29D95F670067C1F0 /* WizardMnemonic */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WizardMnemonic; path = Packages/WizardMnemonic; sourceTree = "<group>"; };
 		46C99D6B29CD985E001F0516 /* Main */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Main; path = Packages/Main; sourceTree = "<group>"; };
 		46D4753029E225B300F0229E /* libtonlibjson.0.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtonlibjson.0.5.dylib; path = TonWallet/libtonlibjson.0.5.dylib; sourceTree = "<group>"; };
 		46D6ED7C29CD96B100D01330 /* TonWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TonWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,12 +50,9 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				4662C76129F51F7200D77E64 /* Wizard */,
+				4662C76029F4761500D77E64 /* Services */,
 				4617F60D29E2B812000A6B7B /* TONKit */,
-				469EBDA729D99D4C00FC5CEA /* WizardBiometric */,
-				46AC705329D96F460082B26E /* WizardPasscode */,
-				4684B98629D9666E0048B451 /* WizardMnemonicInput */,
-				46C5BEFD29D95F670067C1F0 /* WizardMnemonic */,
-				46C5BEFC29D959AD0067C1F0 /* WizardInfo */,
 				4660816129D42BF40027C282 /* Components */,
 				46ACDC7429D404D70020AF32 /* AnimationView */,
 				4610CCED29CDB976002F3EF0 /* Routing */,
@@ -338,7 +332,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Tools/frameworks/Tonlib/ton/build/install-ios_arm64/lib",
 					"$(PROJECT_DIR)/TonWallet",
 				);
 				MARKETING_VERSION = 1.0;
@@ -376,7 +369,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Tools/frameworks/Tonlib/ton/build/install-ios_arm64/lib",
 					"$(PROJECT_DIR)/TonWallet",
 				);
 				MARKETING_VERSION = 1.0;

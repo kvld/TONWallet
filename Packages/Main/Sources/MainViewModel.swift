@@ -4,20 +4,40 @@
 
 import Foundation
 import SwiftUI
+import TON
+import Combine
 
 final class MainViewModel: ObservableObject {
     weak var output: MainModuleOutput?
 
-    private var isInitial = true
+    private var cancellables = Set<AnyCancellable>()
+
+    private let walletStateService: WalletStateService
+
+    init(walletStateService: WalletStateService) {
+        self.walletStateService = walletStateService
+    }
 }
 
 extension MainViewModel {
     func loadInitial() {
-        guard isInitial else {
-            return
-        }
+        walletStateService.walletState
+            .filter { !$0.isUnknown }
+            .sink { [weak self] state in
+                guard let self else {
+                    return
+                }
 
-        isInitial = false
-        output?.showWizard()
+                if case .fetched(let walletInfo) = state, let walletInfo {
+                    self.loadTransactionAndBalance()
+                } else {
+                    self.output?.showWizard()
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    func loadTransactionAndBalance() {
+        print("DD -> load")
     }
 }

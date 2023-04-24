@@ -62,6 +62,10 @@ public final class NavigationRouter: Router {
         lastRouter.viewController.dismiss(animated: true)
         children = children.filter { $0.viewController !== lastRouter.viewController }
     }
+
+    public func popTopmost() {
+        navigationController.popViewController(animated: true)
+    }
 }
 
 private final class NavigationControllerDelegate: NSObject, UINavigationControllerDelegate {

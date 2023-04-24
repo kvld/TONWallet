@@ -7,7 +7,7 @@ import TonLibJSON
 import TONSchema
 
 public final class TONClient {
-    private let client: UnsafeMutableRawPointer
+    private var client: UnsafeMutableRawPointer?
     private let timeout: TimeInterval
 
     private var executingFunctions: [UUID: (Result<Decoder, Swift.Error>) -> Void] = [:]
@@ -21,14 +21,21 @@ public final class TONClient {
 
     public init(timeout: TimeInterval = 10.0) {
         self.timeout = timeout
-        self.client = tonlib_client_json_create()
-
-        #if DEBUG
-            tonlib_client_set_verbosity_level(.max)
-        #endif
 
         receiveQueue.async { [weak self] in
-            self?.receiveEventsFromTONLib()
+            guard let self else {
+                return
+            }
+
+            if self.client == nil {
+                self.client = tonlib_client_json_create()
+            }
+
+            #if DEBUG
+                tonlib_client_set_verbosity_level(.max)
+            #endif
+
+            self.receiveEventsFromTONLib()
         }
     }
 
@@ -59,7 +66,9 @@ public final class TONClient {
     }
 
     deinit {
-        tonlib_client_json_destroy(client)
+        if let client {
+            tonlib_client_json_destroy(client)
+        }
     }
 }
 
@@ -102,7 +111,9 @@ extension TONClient {
             }
 
             String(data: json, encoding: .utf8)?.withCString { pointer in
-                tonlib_client_json_send(client, pointer)
+                if let client {
+                    tonlib_client_json_send(client, pointer)
+                }
             }
         }
     }

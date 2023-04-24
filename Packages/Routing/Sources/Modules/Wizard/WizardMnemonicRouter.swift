@@ -5,11 +5,11 @@
 import Foundation
 import SwiftUI
 import WizardMnemonic
+import WizardState
 
 final class WizardMnemonicRouter: HostingRouter<AnyView, WizardMnemonicModule> {
-    init(onComplete: @escaping () -> Void) {
-        let module = WizardMnemonicModule(onDoneTap: onComplete)
-
+    init(viewModel: WizardViewModel) {
+        let module = WizardMnemonicModule(viewModel: viewModel)
         super.init(view: module.view, module: module)
     }
 }

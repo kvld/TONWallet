@@ -14,14 +14,16 @@ final class WizardForgotMnemonicRouter: HostingRouter<AnyView, WizardInfoModule>
                 title: "Too Bad!",
                 text: "Without the secret words you can’t restore access to the wallet.",
                 isNavigationBarVisible: true,
-                primaryButton: .init(
-                    title: "Enter 24 secret words",
-                    action: onReturnToMnemonicInput
-                ),
-                secondaryButton: .init(
-                    title: "Create a new empty wallet instead",
-                    action: onReturnToInitial
-                )
+                primaryButton: AnyView(EmptyView()),
+                secondaryButton: nil
+//                primaryButton: .init(
+//                    title: "Enter 24 secret words",
+//                    action: onReturnToMnemonicInput
+//                ),
+//                secondaryButton: .init(
+//                    title: "Create a new empty wallet instead",
+//                    action: onReturnToInitial
+//                )
             )
         )
 

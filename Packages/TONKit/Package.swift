@@ -11,6 +11,18 @@ let package = Package(
             name: "TONClient",
             targets: ["TONClient"]
         ),
+        .library(
+            name: "Mnemonic",
+            targets: ["Mnemonic"]
+        ),
+        .library(
+            name: "TONSchema",
+            targets: ["TONSchema"]
+        ),
+        .library(
+            name: "BOC",
+            targets: ["BOC"]
+        ),
         .executable(
             name: "TONPlayground",
             targets: ["TONPlayground"]
@@ -19,6 +31,9 @@ let package = Package(
             name: "TONSchemaGenerator",
             targets: ["TONSchemaGenerator"]
         )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/jedisct1/swift-sodium.git", from: "0.9.1")
     ],
     targets: [
         .target(
@@ -41,7 +56,9 @@ let package = Package(
         ),
         .target(
             name: "Mnemonic",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Sodium", package: "swift-sodium")
+            ],
             path: "Sources/Mnemonic"
         ),
         .executableTarget(

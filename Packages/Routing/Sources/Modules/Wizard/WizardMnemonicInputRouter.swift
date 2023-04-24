@@ -4,20 +4,12 @@
 
 import Foundation
 import WizardMnemonicInput
+import WizardState
 import SwiftUI
 
 final class WizardMnemonicInputRouter: HostingRouter<AnyView, WizardMnemonicInputModule> {
-    init(
-        state: WizardMnemonicInputState,
-        onComplete: @escaping () -> Void,
-        onForgotWords: @escaping () -> Void
-    ) {
-        let module = WizardMnemonicInputModule(
-            state: state,
-            onComplete: onComplete,
-            onForgotWords: onForgotWords
-        )
-
+    init(state: WizardMnemonicInputState, viewModel: WizardViewModel) {
+        let module = WizardMnemonicInputModule(state: state, viewModel: viewModel)
         super.init(view: module.view, module: module)
     }
 }

@@ -13,14 +13,16 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../SwiftUIUtils")
+        .package(path: "../SwiftUIUtils"),
+        .package(path: "../Services")
     ],
     targets: [
         .target(
             name: "Main",
             dependencies: [
                 .product(name: "SwiftUIBackports", package: "SwiftUIUtils"),
-                .product(name: "SwiftUIHelpers", package: "SwiftUIUtils")
+                .product(name: "SwiftUIHelpers", package: "SwiftUIUtils"),
+                .product(name: "TON", package: "Services")
             ],
             path: "Sources/"
         )

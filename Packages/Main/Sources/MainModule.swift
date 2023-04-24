@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import TON
 
 public protocol MainModuleOutput: AnyObject {
     func showWizard()
@@ -23,7 +24,8 @@ public final class MainModule {
     }
 
     public init() {
-        let viewModel = MainViewModel()
+        let walletStateService = WalletStateService(storage: .init())
+        let viewModel = MainViewModel(walletStateService: walletStateService)
 
         self.viewModel = viewModel
         self.view = AnyView(MainView(viewModel: viewModel))

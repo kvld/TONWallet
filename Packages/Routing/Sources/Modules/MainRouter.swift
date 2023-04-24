@@ -5,6 +5,8 @@
 import Foundation
 import Main
 import SwiftUI
+import WizardState
+import TON
 
 public final class MainRouter: HostingRouter<AnyView, MainModule> {
     private weak var parentNavigationRouter: NavigationRouter?
@@ -25,7 +27,12 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let router = WizardRouter(parentNavigationRouter: parentNavigationRouter)
+        let tonService = TONService(configURL: URL(string: "https://ton.org/testnet-global.config.json")!)
+        let walletStateService = WalletStateService(storage: .init())
+
+        let viewModel = WizardViewModel(tonService: tonService, walletStateService: walletStateService)
+
+        let router = WizardRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
 }
