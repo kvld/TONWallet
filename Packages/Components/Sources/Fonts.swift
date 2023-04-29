@@ -43,6 +43,13 @@ extension FontConfiguration {
             lineHeight: 22,
             design: .default
         )
+
+        public let mono: FontConfiguration = .init(
+            pointSize: 17,
+            weight: .regular,
+            lineHeight: 22,
+            design: .monospaced
+        )
     }
 
     public static var body: Body {
@@ -57,6 +64,13 @@ extension FontConfiguration {
             weight: .semibold,
             lineHeight: 18,
             design: .default
+        )
+
+        public let mono: FontConfiguration = .init(
+            pointSize: 15,
+            weight: .regular,
+            lineHeight: 18,
+            design: .monospaced
         )
     }
 
@@ -81,6 +95,19 @@ extension FontConfiguration {
     }
 
     public static var rounded: Rounded {
+        .init()
+    }
+
+    public struct Untyped {
+        public let balanceInteger: FontConfiguration = .init(
+            pointSize: 19,
+            weight: .medium,
+            lineHeight: nil,
+            design: .default
+        )
+    }
+
+    public static var _untyped: Untyped {
         .init()
     }
 }

@@ -7,7 +7,7 @@ import Foundation
 @main
 final class TONSchemaGenerator {
     private static var schemaLink: String {
-        "https://raw.githubusercontent.com/ton-blockchain/ton/master/tl/generate/scheme/tonlib_api.tl"
+        "https://raw.githubusercontent.com/ton-blockchain/ton/3b3c25b654ade3fcea1546d7b91454673038ed4e/tl/generate/scheme/tonlib_api.tl"
     }
 
     private static var outputURL: URL {
@@ -296,17 +296,17 @@ final class TONSchemaGenerator {
                 lines.append("}", indent: 1)
             }
 
-            if parsedArgs.count > 0 {
-                // CodingKeys
-                lines.append("")
-                lines.append("public enum _Key: String, CodingKey {", indent: 1)
-                lines.append("case _type = \"@type\"", indent: 2)
-                for (argName, _) in parsedArgs {
-                    lines.append("case \(argName) = \"\(argName.snakeCased)\"", indent: 2)
-                }
-                lines.append("}", indent: 1)
+            // CodingKeys
+            lines.append("")
+            lines.append("public enum _Key: String, CodingKey {", indent: 1)
+            lines.append("case _type = \"@type\"", indent: 2)
+            for (argName, _) in parsedArgs {
+                lines.append("case \(argName) = \"\(argName.snakeCased)\"", indent: 2)
+            }
+            lines.append("}", indent: 1)
 
-                // init
+            // init
+            if parsedArgs.count > 0 {
                 lines.append("")
                 lines.append("public init(from decoder: Decoder) throws {", indent: 1)
                 lines.append("let container = try decoder.container(keyedBy: _Key.self)", indent: 2)
@@ -314,17 +314,17 @@ final class TONSchemaGenerator {
                     lines.append("self.\(argName) = try container.decode(\(argType).self, forKey: .\(argName))", indent: 2)
                 }
                 lines.append("}", indent: 1)
-
-                // encode
-                lines.append("")
-                lines.append("public func encode(to encoder: Encoder) throws {", indent: 1)
-                lines.append("var container = encoder.container(keyedBy: _Key.self)", indent: 2)
-                lines.append("try container.encode(Self._type, forKey: ._type)", indent: 2)
-                for (argName, _) in parsedArgs {
-                    lines.append("try container.encode(self.\(argName), forKey: .\(argName))", indent: 2)
-                }
-                lines.append("}", indent: 1)
             }
+
+            // encode
+            lines.append("")
+            lines.append("public func encode(to encoder: Encoder) throws {", indent: 1)
+            lines.append("var container = encoder.container(keyedBy: _Key.self)", indent: 2)
+            lines.append("try container.encode(Self._type, forKey: ._type)", indent: 2)
+            for (argName, _) in parsedArgs {
+                lines.append("try container.encode(self.\(argName), forKey: .\(argName))", indent: 2)
+            }
+            lines.append("}", indent: 1)
         }
 
         lines.append("}")
@@ -411,7 +411,7 @@ struct Token: CustomStringConvertible {
         case "Int32":
             return (true, nil)
         case "Int53":
-            return (true, "Int64")
+            return (true, "Swift.Int64")
         case "Int64":
             return (true, "TLInt64")
         case "Int256":
@@ -457,10 +457,11 @@ extension String {
 
 extension String {
     var snakeCased: String {
+        let string = self.replacingOccurrences(of: "`", with: "")
         let acronymPattern = "([A-Z]+)([A-Z][a-z]|[0-9])"
         let normalPattern = "([a-z0-9])([A-Z])"
-        return self.processCamelCaseRegex(pattern: acronymPattern)?
-            .processCamelCaseRegex(pattern: normalPattern)?.lowercased() ?? self.lowercased()
+        return string.processCamelCaseRegex(pattern: acronymPattern)?
+            .processCamelCaseRegex(pattern: normalPattern)?.lowercased() ?? string.lowercased()
     }
 
     private func processCamelCaseRegex(pattern: String) -> String? {

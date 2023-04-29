@@ -27,10 +27,13 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let tonService = TONService(configURL: URL(string: "https://ton.org/testnet-global.config.json")!)
-        let walletStateService = WalletStateService(storage: .init())
+        let tonService = TONService(
+            storage: .init(),
+            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
+        )
+        let walletInfoService = WalletInfoService(storage: .init())
 
-        let viewModel = WizardViewModel(tonService: tonService, walletStateService: walletStateService)
+        let viewModel = WizardViewModel(tonService: tonService, walletInfoService: walletInfoService)
 
         let router = WizardRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)

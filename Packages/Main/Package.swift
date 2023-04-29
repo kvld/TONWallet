@@ -14,12 +14,14 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../SwiftUIUtils"),
-        .package(path: "../Services")
+        .package(path: "../Services"),
+        .package(path: "../AnimationView")
     ],
     targets: [
         .target(
             name: "Main",
             dependencies: [
+                .product(name: "AnimationView", package: "AnimationView"),
                 .product(name: "SwiftUIBackports", package: "SwiftUIUtils"),
                 .product(name: "SwiftUIHelpers", package: "SwiftUIUtils"),
                 .product(name: "TON", package: "Services")

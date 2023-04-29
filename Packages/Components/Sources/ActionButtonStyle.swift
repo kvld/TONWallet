@@ -32,6 +32,7 @@ public enum ActionButtonColor {
 public struct ActionButtonStyle: ButtonStyle {
     private let background: ActionButtonBackground
     private let color: ActionButtonColor
+    private let icon: AnyView?
 
     @Environment(\.isLoading) var isLoading
     @Environment(\.isEnabled) var isEnabled
@@ -54,9 +55,10 @@ public struct ActionButtonStyle: ButtonStyle {
         }
     }
 
-    public init(color: ActionButtonColor, background: ActionButtonBackground) {
+    public init(color: ActionButtonColor, background: ActionButtonBackground, icon: AnyView?) {
         self.background = background
         self.color = color
+        self.icon = icon
     }
 
     public func makeBody(configuration: Configuration) -> some View {
@@ -67,13 +69,18 @@ public struct ActionButtonStyle: ButtonStyle {
                 HStack(spacing: 0) {
                     Spacer(minLength: 4)
 
+                    if let icon {
+                        icon.frame(width: 24, height: 24)
+                            .padding(.trailing, 2)
+                    }
+
                     configuration.label
                         .fontConfiguration(.body.semibold)
-                        .foregroundColor(textColor)
                         .padding(.bottom, 2)
 
                     Spacer(minLength: 4)
                 }
+                .foregroundColor(textColor)
 
                 if isLoading {
                     HStack(alignment: .center) {
@@ -101,8 +108,9 @@ public struct ActionButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == ActionButtonStyle {
     public static func action(
         color: ActionButtonColor = .accent,
-        background: ActionButtonBackground = .filled
+        background: ActionButtonBackground = .filled,
+        icon: AnyView? = nil
     ) -> ActionButtonStyle {
-        ActionButtonStyle(color: color, background: background)
+        ActionButtonStyle(color: color, background: background, icon: icon)
     }
 }

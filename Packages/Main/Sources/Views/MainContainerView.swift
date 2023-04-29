@@ -22,6 +22,7 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
     @State private var shouldExtendPadding: Bool = false
 
     @Binding var isBalanceInNavigationBarTitleVisible: Bool
+    @Binding var containerHeight: CGFloat
     @ViewBuilder let navigationBar: () -> NavigationBar
     @ViewBuilder let balanceView: () -> BalanceView
     @ViewBuilder let contentView: () -> ContentView
@@ -92,11 +93,22 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
 
                     Color.white
                         .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+                        .containerSizeChanged { size in
+                            if containerHeight == 0.0 {
+                                containerHeight = size.height
+                            }
+                        }
                 }
                 .ignoresSafeArea()
             )
             .cornerRadius(16)
             .ignoresSafeArea(.container)
+            .overlay {
+                ScrollViewFinderView { scrollView in
+
+                }
+                .frame(height: 0)
+            }
         }
         .background(
             Color.black.ignoresSafeArea(.container)
@@ -109,5 +121,45 @@ private struct ScrollViewOffsetPreferenceKey: PreferenceKey {
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
+    }
+}
+
+private struct ScrollViewFinderView: UIViewRepresentable {
+    let updateScrollView: (UIScrollView) -> Void
+
+    final class View: UIView {
+        var updateScrollView: ((UIScrollView) -> Void)?
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+
+            func traverse(_ view: UIView) -> UIScrollView? {
+                if let scrollView = view as? UIScrollView {
+                    return scrollView
+                }
+
+                for subview in view.subviews {
+                    if let scrollView = traverse(subview) {
+                        return scrollView
+                    }
+                }
+
+                return nil
+            }
+
+            if let window, let scrollView = traverse(window) {
+                updateScrollView?(scrollView)
+            }
+        }
+    }
+
+    func makeUIView(context: Context) -> View {
+        let view = View()
+        view.updateScrollView = updateScrollView
+        return view
+    }
+
+    func updateUIView(_ uiView: View, context: Context) {
+        uiView.updateScrollView = updateScrollView
     }
 }

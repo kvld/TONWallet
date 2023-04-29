@@ -24,8 +24,12 @@ public final class MainModule {
     }
 
     public init() {
-        let walletStateService = WalletStateService(storage: .init())
-        let viewModel = MainViewModel(walletStateService: walletStateService)
+        let walletInfoService = WalletInfoService(storage: .init())
+        let tonService = TONService(
+            storage: .init(),
+            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
+        )
+        let viewModel = MainViewModel(walletInfoService: walletInfoService, tonService: tonService)
 
         self.viewModel = viewModel
         self.view = AnyView(MainView(viewModel: viewModel))

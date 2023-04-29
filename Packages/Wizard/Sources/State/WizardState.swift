@@ -38,16 +38,16 @@ public protocol WizardViewModelOutput: AnyObject {
 
 public final class WizardViewModel: ObservableObject {
     private let tonService: TONService
-    private let walletStateService: WalletStateService
+    private let walletInfoService: WalletInfoService
 
     @Published public var state: WizardState
 
     public weak var output: WizardViewModelOutput?
 
-    public init(tonService: TONService, walletStateService: WalletStateService) {
+    public init(tonService: TONService, walletInfoService: WalletInfoService) {
         self.tonService = tonService
         self.state = .initial
-        self.walletStateService = walletStateService
+        self.walletInfoService = walletInfoService
     }
 }
 
@@ -129,7 +129,7 @@ extension WizardViewModel {
                 return false
             }
 
-            try! walletStateService.updateWallet(with: walletInfo)
+            try! walletInfoService.updateWallet(with: walletInfo)
             output?.showFinal()
 
             return true

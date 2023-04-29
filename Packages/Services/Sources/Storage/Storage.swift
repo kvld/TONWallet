@@ -68,23 +68,22 @@ public final class Storage {
 
     public func retrieve<T: Decodable>(
         with key: StorageKey,
-        constrainTypeWith type: SecurityType? = nil
-    ) throws -> StorageItemWrapper<T>? {
-        if let type = type {
-            guard let object: T = try resolveStorage(for: type).retrieve(with: key.value) else {
-                return nil
-            }
-
-            return StorageItemWrapper(
-                value: object,
-                type: type,
-                onUpdate: { [weak self] newValue in
-                    try? self?.resolveStorage(for: type).store(newValue, withKey: key.value)
-                }
-            )
-        } else {
-            return try retrieve(with: key, constrainTypeWith: .safe) ?? retrieve(with: key, constrainTypeWith: .unsafe)
+        defaultValue: T,
+        constrainTypeWith type: SecurityType = .`unsafe`
+    ) -> StorageItemWrapper<T> {
+        let onUpdate: (T) -> Void = { [self] newValue in
+            try? self.resolveStorage(for: type).store(newValue, withKey: key.value)
         }
+
+        guard let object: T = try? resolveStorage(for: type).retrieve(with: key.value) else {
+            return StorageItemWrapper(value: defaultValue, type: type, onUpdate: onUpdate)
+        }
+
+        return StorageItemWrapper(
+            value: object,
+            type: type,
+            onUpdate: onUpdate
+        )
     }
 
     public func remove(with key: StorageKey) {

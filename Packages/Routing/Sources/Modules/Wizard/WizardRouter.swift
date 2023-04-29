@@ -209,7 +209,7 @@ private final class WizardPresentAnimationController: NSObject, UIViewController
 
 private final class WizardDismissAnimationController: NSObject, UIViewControllerAnimatedTransitioning {
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        0.75
+        0.5
     }
 
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {

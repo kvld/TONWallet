@@ -3654,7 +3654,7 @@ public struct BlocksMasterchainInfo: TLObject {
         case _type = "@type"
         case last = "last"
         case stateRootHash = "state_root_hash"
-        case `init` = "`init`"
+        case `init` = "init"
     }
 
     public init(from decoder: Decoder) throws {
@@ -4023,6 +4023,43 @@ public struct ConfigInfo: TLObject {
     }
 }
 
+public enum PchanState: TDEnum {
+    case pchanStateInit(PchanStateInit)
+    case pchanStateClose(PchanStateClose)
+    case pchanStatePayout(PchanStatePayout)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case PchanStateInit._type:
+            self = .pchanStateInit(try PchanStateInit(from: decoder))
+        case PchanStateClose._type:
+            self = .pchanStateClose(try PchanStateClose(from: decoder))
+        case PchanStatePayout._type:
+            self = .pchanStatePayout(try PchanStatePayout(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .pchanStateInit(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .pchanStateClose(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .pchanStatePayout(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
 public enum InternalBlockId: TDEnum {
     case tonBlockId(TonBlockId)
 
@@ -4042,6 +4079,68 @@ public enum InternalBlockId: TDEnum {
 
         switch self {
         case let .tonBlockId(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum InputKey: TDEnum {
+    case inputKeyRegular(InputKeyRegular)
+    case inputKeyFake(InputKeyFake)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case InputKeyRegular._type:
+            self = .inputKeyRegular(try InputKeyRegular(from: decoder))
+        case InputKeyFake._type:
+            self = .inputKeyFake(try InputKeyFake(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .inputKeyRegular(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .inputKeyFake(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum SmcMethodId: TDEnum {
+    case smcMethodIdNumber(SmcMethodIdNumber)
+    case smcMethodIdName(SmcMethodIdName)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case SmcMethodIdNumber._type:
+            self = .smcMethodIdNumber(try SmcMethodIdNumber(from: decoder))
+        case SmcMethodIdName._type:
+            self = .smcMethodIdName(try SmcMethodIdName(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .smcMethodIdNumber(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .smcMethodIdName(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
@@ -4110,22 +4209,16 @@ public enum TvmNumber: TDEnum {
     }
 }
 
-public enum PchanState: TDEnum {
-    case pchanStateInit(PchanStateInit)
-    case pchanStateClose(PchanStateClose)
-    case pchanStatePayout(PchanStatePayout)
+public enum RwalletAction: TDEnum {
+    case rwalletActionInit(RwalletActionInit)
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
         let type = try container.decode(String.self, forKey: ._type)
 
         switch type {
-        case PchanStateInit._type:
-            self = .pchanStateInit(try PchanStateInit(from: decoder))
-        case PchanStateClose._type:
-            self = .pchanStateClose(try PchanStateClose(from: decoder))
-        case PchanStatePayout._type:
-            self = .pchanStatePayout(try PchanStatePayout(from: decoder))
+        case RwalletActionInit._type:
+            self = .rwalletActionInit(try RwalletActionInit(from: decoder))
         default: throw TLTypedUnknownTypeError()
         }
     }
@@ -4134,44 +4227,7 @@ public enum PchanState: TDEnum {
         var container = encoder.container(keyedBy: TLTypedCodingKey.self)
 
         switch self {
-        case let .pchanStateInit(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .pchanStateClose(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .pchanStatePayout(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum SyncState: TDEnum {
-    case syncStateDone(SyncStateDone)
-    case syncStateInProgress(SyncStateInProgress)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case SyncStateDone._type:
-            self = .syncStateDone(try SyncStateDone(from: decoder))
-        case SyncStateInProgress._type:
-            self = .syncStateInProgress(try SyncStateInProgress(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .syncStateDone(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .syncStateInProgress(value):
+        case let .rwalletActionInit(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
@@ -4233,16 +4289,25 @@ public enum TvmStackEntry: TDEnum {
     }
 }
 
-public enum RwalletAction: TDEnum {
-    case rwalletActionInit(RwalletActionInit)
+public enum MsgData: TDEnum {
+    case msgDataRaw(MsgDataRaw)
+    case msgDataText(MsgDataText)
+    case msgDataDecryptedText(MsgDataDecryptedText)
+    case msgDataEncryptedText(MsgDataEncryptedText)
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
         let type = try container.decode(String.self, forKey: ._type)
 
         switch type {
-        case RwalletActionInit._type:
-            self = .rwalletActionInit(try RwalletActionInit(from: decoder))
+        case MsgDataRaw._type:
+            self = .msgDataRaw(try MsgDataRaw(from: decoder))
+        case MsgDataText._type:
+            self = .msgDataText(try MsgDataText(from: decoder))
+        case MsgDataDecryptedText._type:
+            self = .msgDataDecryptedText(try MsgDataDecryptedText(from: decoder))
+        case MsgDataEncryptedText._type:
+            self = .msgDataEncryptedText(try MsgDataEncryptedText(from: decoder))
         default: throw TLTypedUnknownTypeError()
         }
     }
@@ -4251,7 +4316,176 @@ public enum RwalletAction: TDEnum {
         var container = encoder.container(keyedBy: TLTypedCodingKey.self)
 
         switch self {
-        case let .rwalletActionInit(value):
+        case let .msgDataRaw(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .msgDataText(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .msgDataDecryptedText(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .msgDataEncryptedText(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum KeyStoreType: TDEnum {
+    case keyStoreTypeDirectory(KeyStoreTypeDirectory)
+    case keyStoreTypeInMemory(KeyStoreTypeInMemory)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case KeyStoreTypeDirectory._type:
+            self = .keyStoreTypeDirectory(try KeyStoreTypeDirectory(from: decoder))
+        case KeyStoreTypeInMemory._type:
+            self = .keyStoreTypeInMemory(try KeyStoreTypeInMemory(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .keyStoreTypeDirectory(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .keyStoreTypeInMemory(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum InitialAccountState: TDEnum {
+    case rawInitialAccountState(RawInitialAccountState)
+    case walletV3InitialAccountState(WalletV3InitialAccountState)
+    case walletHighloadV1InitialAccountState(WalletHighloadV1InitialAccountState)
+    case walletHighloadV2InitialAccountState(WalletHighloadV2InitialAccountState)
+    case rwalletInitialAccountState(RwalletInitialAccountState)
+    case dnsInitialAccountState(DnsInitialAccountState)
+    case pchanInitialAccountState(PchanInitialAccountState)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case RawInitialAccountState._type:
+            self = .rawInitialAccountState(try RawInitialAccountState(from: decoder))
+        case WalletV3InitialAccountState._type:
+            self = .walletV3InitialAccountState(try WalletV3InitialAccountState(from: decoder))
+        case WalletHighloadV1InitialAccountState._type:
+            self = .walletHighloadV1InitialAccountState(try WalletHighloadV1InitialAccountState(from: decoder))
+        case WalletHighloadV2InitialAccountState._type:
+            self = .walletHighloadV2InitialAccountState(try WalletHighloadV2InitialAccountState(from: decoder))
+        case RwalletInitialAccountState._type:
+            self = .rwalletInitialAccountState(try RwalletInitialAccountState(from: decoder))
+        case DnsInitialAccountState._type:
+            self = .dnsInitialAccountState(try DnsInitialAccountState(from: decoder))
+        case PchanInitialAccountState._type:
+            self = .pchanInitialAccountState(try PchanInitialAccountState(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .rawInitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .walletV3InitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .walletHighloadV1InitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .walletHighloadV2InitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .rwalletInitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .dnsInitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .pchanInitialAccountState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum Update: TDEnum {
+    case updateSendLiteServerQuery(UpdateSendLiteServerQuery)
+    case updateSyncState(UpdateSyncState)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case UpdateSendLiteServerQuery._type:
+            self = .updateSendLiteServerQuery(try UpdateSendLiteServerQuery(from: decoder))
+        case UpdateSyncState._type:
+            self = .updateSyncState(try UpdateSyncState(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .updateSendLiteServerQuery(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .updateSyncState(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum PchanAction: TDEnum {
+    case pchanActionInit(PchanActionInit)
+    case pchanActionClose(PchanActionClose)
+    case pchanActionTimeout(PchanActionTimeout)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case PchanActionInit._type:
+            self = .pchanActionInit(try PchanActionInit(from: decoder))
+        case PchanActionClose._type:
+            self = .pchanActionClose(try PchanActionClose(from: decoder))
+        case PchanActionTimeout._type:
+            self = .pchanActionTimeout(try PchanActionTimeout(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .pchanActionInit(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .pchanActionClose(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .pchanActionTimeout(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
@@ -4325,37 +4559,6 @@ public enum AccountState: TDEnum {
     }
 }
 
-public enum Update: TDEnum {
-    case updateSendLiteServerQuery(UpdateSendLiteServerQuery)
-    case updateSyncState(UpdateSyncState)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case UpdateSendLiteServerQuery._type:
-            self = .updateSendLiteServerQuery(try UpdateSendLiteServerQuery(from: decoder))
-        case UpdateSyncState._type:
-            self = .updateSyncState(try UpdateSyncState(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .updateSendLiteServerQuery(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .updateSyncState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
 public enum LogStream: TDEnum {
     case logStreamDefault(LogStreamDefault)
     case logStreamFile(LogStreamFile)
@@ -4387,222 +4590,6 @@ public enum LogStream: TDEnum {
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         case let .logStreamEmpty(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum PchanAction: TDEnum {
-    case pchanActionInit(PchanActionInit)
-    case pchanActionClose(PchanActionClose)
-    case pchanActionTimeout(PchanActionTimeout)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case PchanActionInit._type:
-            self = .pchanActionInit(try PchanActionInit(from: decoder))
-        case PchanActionClose._type:
-            self = .pchanActionClose(try PchanActionClose(from: decoder))
-        case PchanActionTimeout._type:
-            self = .pchanActionTimeout(try PchanActionTimeout(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .pchanActionInit(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .pchanActionClose(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .pchanActionTimeout(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum InputKey: TDEnum {
-    case inputKeyRegular(InputKeyRegular)
-    case inputKeyFake(InputKeyFake)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case InputKeyRegular._type:
-            self = .inputKeyRegular(try InputKeyRegular(from: decoder))
-        case InputKeyFake._type:
-            self = .inputKeyFake(try InputKeyFake(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .inputKeyRegular(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .inputKeyFake(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum MsgData: TDEnum {
-    case msgDataRaw(MsgDataRaw)
-    case msgDataText(MsgDataText)
-    case msgDataDecryptedText(MsgDataDecryptedText)
-    case msgDataEncryptedText(MsgDataEncryptedText)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case MsgDataRaw._type:
-            self = .msgDataRaw(try MsgDataRaw(from: decoder))
-        case MsgDataText._type:
-            self = .msgDataText(try MsgDataText(from: decoder))
-        case MsgDataDecryptedText._type:
-            self = .msgDataDecryptedText(try MsgDataDecryptedText(from: decoder))
-        case MsgDataEncryptedText._type:
-            self = .msgDataEncryptedText(try MsgDataEncryptedText(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .msgDataRaw(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .msgDataText(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .msgDataDecryptedText(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .msgDataEncryptedText(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum SmcMethodId: TDEnum {
-    case smcMethodIdNumber(SmcMethodIdNumber)
-    case smcMethodIdName(SmcMethodIdName)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case SmcMethodIdNumber._type:
-            self = .smcMethodIdNumber(try SmcMethodIdNumber(from: decoder))
-        case SmcMethodIdName._type:
-            self = .smcMethodIdName(try SmcMethodIdName(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .smcMethodIdNumber(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .smcMethodIdName(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum LiteServerTransactionId: TDEnum {
-    case blocksShortTxId(BlocksShortTxId)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case BlocksShortTxId._type:
-            self = .blocksShortTxId(try BlocksShortTxId(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .blocksShortTxId(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        }
-    }
-}
-
-public enum Action: TDEnum {
-    case actionNoop(ActionNoop)
-    case actionMsg(ActionMsg)
-    case actionDns(ActionDns)
-    case actionPchan(ActionPchan)
-    case actionRwallet(ActionRwallet)
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
-        let type = try container.decode(String.self, forKey: ._type)
-
-        switch type {
-        case ActionNoop._type:
-            self = .actionNoop(try ActionNoop(from: decoder))
-        case ActionMsg._type:
-            self = .actionMsg(try ActionMsg(from: decoder))
-        case ActionDns._type:
-            self = .actionDns(try ActionDns(from: decoder))
-        case ActionPchan._type:
-            self = .actionPchan(try ActionPchan(from: decoder))
-        case ActionRwallet._type:
-            self = .actionRwallet(try ActionRwallet(from: decoder))
-        default: throw TLTypedUnknownTypeError()
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
-
-        switch self {
-        case let .actionNoop(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .actionMsg(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .actionDns(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .actionPchan(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .actionRwallet(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
@@ -4664,34 +4651,19 @@ public enum DnsEntryData: TDEnum {
     }
 }
 
-public enum InitialAccountState: TDEnum {
-    case rawInitialAccountState(RawInitialAccountState)
-    case walletV3InitialAccountState(WalletV3InitialAccountState)
-    case walletHighloadV1InitialAccountState(WalletHighloadV1InitialAccountState)
-    case walletHighloadV2InitialAccountState(WalletHighloadV2InitialAccountState)
-    case rwalletInitialAccountState(RwalletInitialAccountState)
-    case dnsInitialAccountState(DnsInitialAccountState)
-    case pchanInitialAccountState(PchanInitialAccountState)
+public enum SyncState: TDEnum {
+    case syncStateDone(SyncStateDone)
+    case syncStateInProgress(SyncStateInProgress)
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
         let type = try container.decode(String.self, forKey: ._type)
 
         switch type {
-        case RawInitialAccountState._type:
-            self = .rawInitialAccountState(try RawInitialAccountState(from: decoder))
-        case WalletV3InitialAccountState._type:
-            self = .walletV3InitialAccountState(try WalletV3InitialAccountState(from: decoder))
-        case WalletHighloadV1InitialAccountState._type:
-            self = .walletHighloadV1InitialAccountState(try WalletHighloadV1InitialAccountState(from: decoder))
-        case WalletHighloadV2InitialAccountState._type:
-            self = .walletHighloadV2InitialAccountState(try WalletHighloadV2InitialAccountState(from: decoder))
-        case RwalletInitialAccountState._type:
-            self = .rwalletInitialAccountState(try RwalletInitialAccountState(from: decoder))
-        case DnsInitialAccountState._type:
-            self = .dnsInitialAccountState(try DnsInitialAccountState(from: decoder))
-        case PchanInitialAccountState._type:
-            self = .pchanInitialAccountState(try PchanInitialAccountState(from: decoder))
+        case SyncStateDone._type:
+            self = .syncStateDone(try SyncStateDone(from: decoder))
+        case SyncStateInProgress._type:
+            self = .syncStateInProgress(try SyncStateInProgress(from: decoder))
         default: throw TLTypedUnknownTypeError()
         }
     }
@@ -4700,44 +4672,38 @@ public enum InitialAccountState: TDEnum {
         var container = encoder.container(keyedBy: TLTypedCodingKey.self)
 
         switch self {
-        case let .rawInitialAccountState(value):
+        case let .syncStateDone(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
-        case let .walletV3InitialAccountState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .walletHighloadV1InitialAccountState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .walletHighloadV2InitialAccountState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .rwalletInitialAccountState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .dnsInitialAccountState(value):
-            try container.encode(type(of: value)._type, forKey: ._type)
-            try value.encode(to: encoder)
-        case let .pchanInitialAccountState(value):
+        case let .syncStateInProgress(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
     }
 }
 
-public enum KeyStoreType: TDEnum {
-    case keyStoreTypeDirectory(KeyStoreTypeDirectory)
-    case keyStoreTypeInMemory(KeyStoreTypeInMemory)
+public enum Action: TDEnum {
+    case actionNoop(ActionNoop)
+    case actionMsg(ActionMsg)
+    case actionDns(ActionDns)
+    case actionPchan(ActionPchan)
+    case actionRwallet(ActionRwallet)
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
         let type = try container.decode(String.self, forKey: ._type)
 
         switch type {
-        case KeyStoreTypeDirectory._type:
-            self = .keyStoreTypeDirectory(try KeyStoreTypeDirectory(from: decoder))
-        case KeyStoreTypeInMemory._type:
-            self = .keyStoreTypeInMemory(try KeyStoreTypeInMemory(from: decoder))
+        case ActionNoop._type:
+            self = .actionNoop(try ActionNoop(from: decoder))
+        case ActionMsg._type:
+            self = .actionMsg(try ActionMsg(from: decoder))
+        case ActionDns._type:
+            self = .actionDns(try ActionDns(from: decoder))
+        case ActionPchan._type:
+            self = .actionPchan(try ActionPchan(from: decoder))
+        case ActionRwallet._type:
+            self = .actionRwallet(try ActionRwallet(from: decoder))
         default: throw TLTypedUnknownTypeError()
         }
     }
@@ -4746,10 +4712,44 @@ public enum KeyStoreType: TDEnum {
         var container = encoder.container(keyedBy: TLTypedCodingKey.self)
 
         switch self {
-        case let .keyStoreTypeDirectory(value):
+        case let .actionNoop(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
-        case let .keyStoreTypeInMemory(value):
+        case let .actionMsg(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .actionDns(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .actionPchan(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        case let .actionRwallet(value):
+            try container.encode(type(of: value)._type, forKey: ._type)
+            try value.encode(to: encoder)
+        }
+    }
+}
+
+public enum LiteServerTransactionId: TDEnum {
+    case blocksShortTxId(BlocksShortTxId)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: TLTypedCodingKey.self)
+        let type = try container.decode(String.self, forKey: ._type)
+
+        switch type {
+        case BlocksShortTxId._type:
+            self = .blocksShortTxId(try BlocksShortTxId(from: decoder))
+        default: throw TLTypedUnknownTypeError()
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: TLTypedCodingKey.self)
+
+        switch self {
+        case let .blocksShortTxId(value):
             try container.encode(type(of: value)._type, forKey: ._type)
             try value.encode(to: encoder)
         }
@@ -4792,6 +4792,15 @@ public struct Close: TLFunction {
     public static var _type: String { "close" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct OptionsSetConfig: TLFunction {
@@ -4932,6 +4941,15 @@ public struct DeleteAllKeys: TLFunction {
     public static var _type: String { "deleteAllKeys" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct ExportKey: TLFunction {
@@ -5739,6 +5757,15 @@ public struct Sync: TLFunction {
     public static var _type: String { "sync" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct GetAccountAddress: TLFunction {
@@ -6697,6 +6724,15 @@ public struct BlocksGetMasterchainInfo: TLFunction {
     public static var _type: String { "blocks.getMasterchainInfo" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct BlocksGetShards: TLFunction {
@@ -6995,6 +7031,15 @@ public struct LiteServerGetInfo: TLFunction {
     public static var _type: String { "liteServer.getInfo" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct SetLogStream: TLFunction {
@@ -7033,6 +7078,15 @@ public struct GetLogStream: TLFunction {
     public static var _type: String { "getLogStream" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct SetLogVerbosityLevel: TLFunction {
@@ -7071,6 +7125,15 @@ public struct GetLogVerbosityLevel: TLFunction {
     public static var _type: String { "getLogVerbosityLevel" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct GetLogTags: TLFunction {
@@ -7079,6 +7142,15 @@ public struct GetLogTags: TLFunction {
     public static var _type: String { "getLogTags" }
 
     public init() { }
+
+    public enum _Key: String, CodingKey {
+        case _type = "@type"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: _Key.self)
+        try container.encode(Self._type, forKey: ._type)
+    }
 }
 
 public struct SetLogTagVerbosityLevel: TLFunction {

@@ -7,13 +7,13 @@ import Foundation
 public struct WalletInfo: Codable {
     public let uuid: UUID
     public let type: WalletType
-    public let address: String
+    public let address: Address
     public let keys: Keys
 
     public init(
         uuid: UUID,
         type: WalletType = .default,
-        address: String,
+        address: Address,
         keys: Keys
     ) {
         self.uuid = uuid
