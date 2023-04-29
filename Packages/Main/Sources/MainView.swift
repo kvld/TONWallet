@@ -14,6 +14,14 @@ struct MainView: View {
 
     @State private var isBalanceInNavigationBarTitleVisible = false
     @State private var containerHeight: CGFloat = 0.0
+    @State private var isRefreshControlActive = false
+
+    @State private var refreshControl: UIRefreshControl = {
+        let control = UIRefreshControl(frame: .init(x: 0, y: 0, width: 32, height: 32))
+        control.backgroundColor = .black
+        control.tintColor = .white
+        return control
+    }()
 
     @ViewBuilder
     private var balanceView: some View {
@@ -57,6 +65,16 @@ struct MainView: View {
     }
 
     @ViewBuilder
+    private var navigationBarBalanceView: some View {
+        if case let .idle(model) = viewModel.state {
+            SmallBalanceView(
+                model: model.isLoading ? .updating : .idle(balance: model.balance.formatted, fiatRate: nil)
+            )
+            .opacity(model.isLoading || isBalanceInNavigationBarTitleVisible ? 1.0 : 0.0)
+        }
+    }
+
+    @ViewBuilder
     private var contentView: some View {
         switch viewModel.state {
         case .preparing:
@@ -84,7 +102,18 @@ struct MainView: View {
                     }
                 }
 
-                Spacer().frame(height: 100)
+                if model.canLoadMore {
+                    ProgressView().padding(.vertical, 24)
+                        .onAppear {
+                            Task {
+                                await viewModel.loadMoreTransactions()
+                            }
+                        }
+                } else {
+                    Spacer().frame(height: 60)
+                }
+
+                Spacer().frame(height: 40)
             }
         }
     }
@@ -92,15 +121,12 @@ struct MainView: View {
     var body: some View {
         MainContainerView(
             isBalanceInNavigationBarTitleVisible: $isBalanceInNavigationBarTitleVisible,
-            containerHeight: $containerHeight
+            containerHeight: $containerHeight,
+            isRefreshControlActive: $isRefreshControlActive,
+            refreshControl: refreshControl
         ) {
             MainNavigationBar {
-                if case let .idle(model) = viewModel.state {
-                    SmallBalanceView(
-                        model: .idle(balance: model.balance.formatted, fiatRate: nil)
-                    )
-                    .opacity(isBalanceInNavigationBarTitleVisible ? 1.0 : 0.0)
-                }
+                navigationBarBalanceView
             }
         } balanceView: {
             balanceView
@@ -111,6 +137,21 @@ struct MainView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 viewModel.loadInitial()
             }
+        }
+        .onAppear {
+            refreshControl.addAction(
+                .init { [weak refreshControl] _ in
+                    Task { @MainActor in
+                        isRefreshControlActive = true
+
+                        await viewModel.refresh()
+
+                        isRefreshControlActive = false
+                        refreshControl?.endRefreshing()
+                    }
+                },
+                for: .valueChanged
+            )
         }
     }
 }

@@ -10,19 +10,22 @@ import Combine
 
 private let mainScrollViewCoordinatesID = "mainScroll"
 
+typealias RefreshEndToken = () -> Void
+
 struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: View>: View {
     private enum Dimensions {
         static var balanceAreaHeight: CGFloat { 248 }
-        static var refreshControlHeight: CGFloat { 44 }
+        static var refreshControlHeight: CGFloat { 60 }
     }
 
     @State private var offset: CGFloat = .zero
 
-    @State private var isLoading: Bool = false
-    @State private var shouldExtendPadding: Bool = false
+    @State private var isInRefresh = false
 
     @Binding var isBalanceInNavigationBarTitleVisible: Bool
     @Binding var containerHeight: CGFloat
+    @Binding var isRefreshControlActive: Bool
+    let refreshControl: UIRefreshControl
     @ViewBuilder let navigationBar: () -> NavigationBar
     @ViewBuilder let balanceView: () -> BalanceView
     @ViewBuilder let contentView: () -> ContentView
@@ -34,16 +37,6 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
             ScrollView {
                 ZStack {
                     VStack(spacing: 0) {
-                        Color.black
-                            .frame(
-                                height: shouldExtendPadding
-                                    ? Dimensions.refreshControlHeight
-                                : min(max(0, offset), Dimensions.refreshControlHeight)
-                            )
-
-                        RefreshControlView()
-                            .padding(.top, -Dimensions.refreshControlHeight)
-
                         Color.clear.frame(height: Dimensions.balanceAreaHeight)
                             .overlay(alignment: .center, content: balanceView)
 
@@ -59,35 +52,24 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
             }
             .coordinateSpace(name: mainScrollViewCoordinatesID)
             .onPreferenceChange(ScrollViewOffsetPreferenceKey.self) { value in
-                offset = value
-
-                isBalanceInNavigationBarTitleVisible = -value >= 98
-
-                if value >= Dimensions.refreshControlHeight {
-                    isLoading = true
-                } else if isLoading, value <= Dimensions.refreshControlHeight {
-                    shouldExtendPadding = true
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        withAnimation {
-                            isLoading = false
-                            shouldExtendPadding = false
-                        }
-                    }
+                // to prevent jumps in pull-to-refresh
+                if abs(offset - value) > 50, isInRefresh != isRefreshControlActive {
+                    isInRefresh.toggle()
                 }
+
+                offset = value
+                isBalanceInNavigationBarTitleVisible = -value >= 98
             }
             .background(
                 VStack(spacing: 0) {
                     Color.black
                         .frame(
-                            height: shouldExtendPadding
-                                ? Dimensions.refreshControlHeight
-                            : min(max(0, offset), Dimensions.refreshControlHeight)
-                        )
-
-                    Color.black
-                        .frame(
-                            height: max(offset + Dimensions.balanceAreaHeight, 0),
+                            height: max(
+                                offset
+                                    + Dimensions.balanceAreaHeight
+                                    + (isInRefresh ? Dimensions.refreshControlHeight : 0),
+                                0
+                            ),
                             alignment: .top
                         )
 
@@ -105,7 +87,7 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
             .ignoresSafeArea(.container)
             .overlay {
                 ScrollViewFinderView { scrollView in
-
+                    scrollView.refreshControl = refreshControl
                 }
                 .frame(height: 0)
             }

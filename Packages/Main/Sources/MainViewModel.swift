@@ -13,10 +13,17 @@ enum MainViewState {
     case idle(Model)
 
     struct Model {
-        let isLoading: Bool
+        var isLoading: Bool
+        let canLoadMore: Bool
         let balance: FormattedGram
         let address: (full: String, short: String)
-        let transactions: [TransactionListModel]
+        var transactions: [TransactionListModel]
+
+        func with(mutation: (inout Model) -> Void) -> Model {
+            var new = self
+            mutation(&new)
+            return new
+        }
     }
 
     enum TransactionListModel: Identifiable {
@@ -44,10 +51,17 @@ enum MainViewState {
     }
 }
 
+struct PaginationState {
+    var isInLoading: Bool
+    var lastTransactionID: TransactionID?
+}
+
 final class MainViewModel: ObservableObject {
     weak var output: MainModuleOutput?
 
     private var isInitialized = false
+    private var paginationState = PaginationState(isInLoading: false)
+    private var walletInfo: WalletInfo?
     private var cancellables = Set<AnyCancellable>()
 
     private let walletInfoService: WalletInfoService
@@ -77,8 +91,10 @@ extension MainViewModel {
                 }
 
                 if case .fetched(let walletInfo) = state, let walletInfo {
+                    self.walletInfo = walletInfo
+
                     Task {
-                        await self.loadTransactionsAndBalance(walletInfo: walletInfo)
+                        await self.loadTransactionsAndBalance()
                     }
                 } else {
                     self.output?.showWizard()
@@ -88,17 +104,24 @@ extension MainViewModel {
     }
 
     @MainActor
-    func loadTransactionsAndBalance(walletInfo: WalletInfo) async {
-        state = .loading
+    func loadTransactionsAndBalance() async {
+        guard let walletInfo else { return }
+
+        switch state {
+        case .preparing, .loading:
+            state = .loading
+        case .idle:
+            try? await Task.sleep(nanoseconds: 5 * 100_000_000) // for fast refresh, but need debounce
+        }
 
         do {
             let walletState = try await Task {
-                let testAddress = Address("EQBYivdc0GAk-nnczaMnYNuSjpeXu2nJS3DZ4KqLjosX5sVC")
+                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
                 return try await tonService.fetchWalletState(address: testAddress)
             }.value
 
             let transactions = try await Task {
-                let testAddress = Address("EQBYivdc0GAk-nnczaMnYNuSjpeXu2nJS3DZ4KqLjosX5sVC")
+                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
                 return try await tonService.fetchTransactions(
                     address: testAddress,
                     fromTransaction: walletState.lastTransactionID
@@ -107,18 +130,86 @@ extension MainViewModel {
 
             let model = MainViewState.Model(
                 isLoading: false,
+                canLoadMore: transactions.lastTransaction != nil,
                 balance: walletState.balance.formatted,
                 address: (walletInfo.address.value, walletInfo.address.shortened()),
                 transactions: MainViewState.TransactionListModel.makeList(
                     from: transactions.transactions,
-                    myAddress: walletInfo.address
+                    myAddress: Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
                 )
             )
 
             state = .idle(model)
+            paginationState = .init(isInLoading: false, lastTransactionID: transactions.lastTransaction)
         } catch {
             print("[ERROR]", error)
             // TODO: error
+        }
+    }
+
+    @MainActor
+    func refresh() async {
+        guard !paginationState.isInLoading, case let .idle(model) = state, !model.isLoading else {
+            return
+        }
+
+        await loadTransactionsAndBalance()
+    }
+
+    @MainActor
+    func loadMoreTransactions() async {
+        guard let lastTransaction = paginationState.lastTransactionID, let walletInfo else {
+            return
+        }
+
+        paginationState.isInLoading = true
+        defer {
+            paginationState.isInLoading = false
+        }
+
+        do {
+            let result: (TransactionID?, MainViewState)? = try await Task {
+                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
+                let transactions = try await tonService.fetchTransactions(
+                    address: testAddress,
+                    fromTransaction: lastTransaction
+                )
+
+                let newTransactions = MainViewState.TransactionListModel.makeList(
+                    from: transactions.transactions,
+                    myAddress: walletInfo.address
+                )
+
+                if case let .idle(model) = state {
+                    var uniqueDateSeparators = Set<String>()
+                    let allTransactions = (model.transactions + newTransactions).filter { transaction in
+                        switch transaction {
+                        case let .date(date):
+                            if uniqueDateSeparators.contains(date) {
+                                return false
+                            }
+                            uniqueDateSeparators.insert(date)
+                            return true
+                        default:
+                            return true
+                        }
+                    }
+
+                    let newModel = model.with {
+                        $0.transactions = allTransactions
+                    }
+                    return (transactions.lastTransaction, MainViewState.idle(newModel))
+                }
+
+                return nil
+            }.value
+
+            if let result {
+                paginationState.lastTransactionID = result.0
+                state = result.1
+            }
+        } catch {
+            // todo: retry
         }
     }
 }

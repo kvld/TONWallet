@@ -154,14 +154,12 @@ extension TONService {
 
         let response = try await client.execute(transactionsRequest)
 
-        let lastTransaction: TransactionID? = response.transactions.isEmpty
+        let lastTransaction: TransactionID? = response.previousTransactionId.lt.value == 0
             ? nil
             : .init(lt: response.previousTransactionId.lt.value, hash: response.previousTransactionId.hash)
 
-        let transactions = response.transactions.compactMap { tr -> Transaction? in
-            guard let msg = tr.outMsgs.first else {
-                return nil
-            }
+        let transactions = response.transactions.map { tr -> Transaction in
+            let msg = tr.outMsgs.first ?? tr.inMsg
 
             return Transaction(
                 id: .init(lt: tr.transactionId.lt.value, hash: tr.transactionId.hash),
