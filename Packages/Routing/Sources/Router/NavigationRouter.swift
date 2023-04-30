@@ -42,9 +42,14 @@ public final class NavigationRouter: Router {
         navigationController.setViewControllers([router.viewController], animated: false)
     }
 
-    public func present(router: Router, animated: Bool = true) {
+    public func present(router: Router, overModal: Bool = false, animated: Bool = true) {
         children.append(router)
-        navigationController.present(router.viewController, animated: animated)
+
+        if overModal, let controller = navigationController.presentedViewController {
+            controller.present(router.viewController, animated: animated)
+        } else {
+            navigationController.present(router.viewController, animated: animated)
+        }
     }
 
     public func push(router: Router, animated: Bool = true) {

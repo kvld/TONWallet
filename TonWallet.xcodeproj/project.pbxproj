@@ -19,9 +19,11 @@
 		4610CCED29CDB976002F3EF0 /* Routing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Routing; path = Packages/Routing; sourceTree = "<group>"; };
 		4617F60D29E2B812000A6B7B /* TONKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TONKit; path = Packages/TONKit; sourceTree = "<group>"; };
 		46329A4D29D884CA009B7203 /* RLottie.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = RLottie.xcframework; path = Packages/AnimationView/Frameworks/RLottie.xcframework; sourceTree = "<group>"; };
+		4643EDF529FEA1DD00EB828C /* Receive */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Receive; path = Packages/Receive; sourceTree = "<group>"; };
 		4660816129D42BF40027C282 /* Components */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Components; path = Packages/Components; sourceTree = "<group>"; };
 		4662C76029F4761500D77E64 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Services; path = Packages/Services; sourceTree = "<group>"; };
 		4662C76129F51F7200D77E64 /* Wizard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Wizard; path = Packages/Wizard; sourceTree = "<group>"; };
+		4686AFA129FEA80100A7803D /* QRUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = QRUtils; path = Packages/QRUtils; sourceTree = "<group>"; };
 		46ACDC7429D404D70020AF32 /* AnimationView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationView; path = Packages/AnimationView; sourceTree = "<group>"; };
 		46AE1D8E29CDA617006A184E /* SwiftUIUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftUIUtils; path = Packages/SwiftUIUtils; sourceTree = "<group>"; };
 		46C99D6B29CD985E001F0516 /* Main */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Main; path = Packages/Main; sourceTree = "<group>"; };
@@ -50,6 +52,8 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				4686AFA129FEA80100A7803D /* QRUtils */,
+				4643EDF529FEA1DD00EB828C /* Receive */,
 				4662C76129F51F7200D77E64 /* Wizard */,
 				4662C76029F4761500D77E64 /* Services */,
 				4617F60D29E2B812000A6B7B /* TONKit */,

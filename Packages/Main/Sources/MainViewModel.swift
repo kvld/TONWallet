@@ -76,6 +76,16 @@ final class MainViewModel: ObservableObject {
 }
 
 extension MainViewModel {
+    func showReceive() {
+        guard let walletInfo else {
+            return
+        }
+
+        output?.showReceive(walletInfo: walletInfo)
+    }
+}
+
+extension MainViewModel {
     func loadInitial() {
         guard !isInitialized else {
             return

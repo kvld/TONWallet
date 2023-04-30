@@ -14,7 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../Main"),
-        .package(path: "../Wizard")
+        .package(path: "../Wizard"),
+        .package(path: "../Receive")
     ],
     targets: [
         .target(
@@ -27,7 +28,8 @@ let package = Package(
                 .product(name: "WizardPasscode", package: "Wizard"),
                 .product(name: "WizardBiometric", package: "Wizard"),
                 .product(name: "WizardState", package: "Wizard"),
-                .product(name: "WizardInitial", package: "Wizard")
+                .product(name: "WizardInitial", package: "Wizard"),
+                .product(name: "Receive", package: "Receive")
             ],
             path: "Sources/"
         )

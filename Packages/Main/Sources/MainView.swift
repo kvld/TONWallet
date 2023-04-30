@@ -40,7 +40,7 @@ struct MainView: View {
             Spacer().frame(height: 74)
 
             HStack(spacing: 12) {
-                Button("Receive", action: { })
+                Button("Receive", action: { viewModel.showReceive() })
                     .buttonStyle(
                         .action(
                             color: .accentMain,

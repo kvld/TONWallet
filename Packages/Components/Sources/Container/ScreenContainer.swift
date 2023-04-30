@@ -13,6 +13,11 @@ public enum NavigationBarVisibilityState {
     case preserveSpace
 }
 
+public enum NavigationBarButton {
+    case back
+    case cancel
+}
+
 public final class ScreenContainerProxy {
     public let navigationBarHeight: CGFloat
     public let containerSize: CGSize
@@ -32,6 +37,7 @@ public struct ScreenContainer<Content: View>: View {
 
     private let navigationBarTitle: String?
     private let navigationBarVisibility: NavigationBarVisibilityState
+    private let navigationBarLeftButton: NavigationBarButton
     private let wrapInScrollView: Bool
 
     @State private var scrollOffset: CGFloat = 0
@@ -44,11 +50,13 @@ public struct ScreenContainer<Content: View>: View {
     public init(
         navigationBarVisibility: NavigationBarVisibilityState = .visible,
         navigationBarTitle: String? = nil,
+        navigationBarLeftButton: NavigationBarButton = .back,
         wrapInScrollView: Bool = true,
         @ViewBuilder content: @escaping (ScreenContainerProxy) -> Content
     ) {
         self.navigationBarVisibility = navigationBarVisibility
         self.navigationBarTitle = navigationBarTitle
+        self.navigationBarLeftButton = navigationBarLeftButton
         self.wrapInScrollView = wrapInScrollView
         self.content = content
     }
@@ -98,7 +106,8 @@ public struct ScreenContainer<Content: View>: View {
                         if navigationBarVisibility == .visible {
                             NavigationBar(
                                 title: navigationBarTitle,
-                                isTitleVisible: -scrollOffset > navigationBarTitleAnchorOffset
+                                isTitleVisible: -scrollOffset > navigationBarTitleAnchorOffset,
+                                leftButton: navigationBarLeftButton
                             )
                         } else {
                             EmptyView()
@@ -136,22 +145,32 @@ private struct NavigationBar: View {
 
     let title: String?
     let isTitleVisible: Bool
+    let leftButton: NavigationBarButton
 
     var body: some View {
         ZStack(alignment: .center) {
             HStack(alignment: .center, spacing: 8) {
                 HStack(alignment: .center, spacing: 8) {
-                    Image("back")
-                        .renderingMode(.template)
-                        .frame(
-                            width: FontConfiguration.body.regular.pointSize * 0.5,
-                            height: FontConfiguration.body.regular.pointSize
-                        )
+                    switch leftButton {
+                    case .back:
+                        Image("back")
+                            .renderingMode(.template)
+                            .frame(
+                                width: FontConfiguration.body.regular.pointSize * 0.5,
+                                height: FontConfiguration.body.regular.pointSize
+                            )
 
-                    Text("Back")
-                        .fontConfiguration(.body.regular)
-                        .frame(height: FontConfiguration.body.regular.pointSize)
-                        .padding(.top, -2)
+                        Text("Back")
+                            .fontConfiguration(.body.regular)
+                            .frame(height: FontConfiguration.body.regular.pointSize)
+                            .padding(.top, -2)
+
+                    case .cancel:
+                        Text("Cancel")
+                            .fontConfiguration(.body.regular)
+                            .frame(height: FontConfiguration.body.regular.pointSize)
+                            .padding(.leading, 7)
+                    }
                 }
                 .onTapWithFeedback {
                     presentationMode.wrappedValue.dismiss()

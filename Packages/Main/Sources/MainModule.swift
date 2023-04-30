@@ -8,6 +8,7 @@ import TON
 
 public protocol MainModuleOutput: AnyObject {
     func showWizard()
+    func showReceive(walletInfo: WalletInfo)
 }
 
 public final class MainModule {

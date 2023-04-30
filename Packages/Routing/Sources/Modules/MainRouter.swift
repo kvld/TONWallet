@@ -38,4 +38,14 @@ extension MainRouter: MainModuleOutput {
         let router = WizardRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
+
+    public func showReceive(walletInfo: WalletInfo) {
+        guard let parentNavigationRouter else {
+            return
+        }
+
+
+        let router = ReceiveRouter(parentNavigationRouter: parentNavigationRouter, walletInfo: walletInfo)
+        parentNavigationRouter.present(router: router)
+    }
 }
