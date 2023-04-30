@@ -14,7 +14,6 @@ struct MainView: View {
 
     @State private var isBalanceInNavigationBarTitleVisible = false
     @State private var containerHeight: CGFloat = 0.0
-    @State private var isRefreshControlActive = false
 
     @State private var refreshControl: UIRefreshControl = {
         let control = UIRefreshControl(frame: .init(x: 0, y: 0, width: 32, height: 32))
@@ -122,7 +121,6 @@ struct MainView: View {
         MainContainerView(
             isBalanceInNavigationBarTitleVisible: $isBalanceInNavigationBarTitleVisible,
             containerHeight: $containerHeight,
-            isRefreshControlActive: $isRefreshControlActive,
             refreshControl: refreshControl
         ) {
             MainNavigationBar {
@@ -142,11 +140,7 @@ struct MainView: View {
             refreshControl.addAction(
                 .init { [weak refreshControl] _ in
                     Task { @MainActor in
-                        isRefreshControlActive = true
-
                         await viewModel.refresh()
-
-                        isRefreshControlActive = false
                         refreshControl?.endRefreshing()
                     }
                 },

@@ -10,21 +10,16 @@ import Combine
 
 private let mainScrollViewCoordinatesID = "mainScroll"
 
-typealias RefreshEndToken = () -> Void
-
 struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: View>: View {
     private enum Dimensions {
         static var balanceAreaHeight: CGFloat { 248 }
-        static var refreshControlHeight: CGFloat { 60 }
     }
 
     @State private var offset: CGFloat = .zero
-
-    @State private var isInRefresh = false
+    @State private var didScrollOnce = false
 
     @Binding var isBalanceInNavigationBarTitleVisible: Bool
     @Binding var containerHeight: CGFloat
-    @Binding var isRefreshControlActive: Bool
     let refreshControl: UIRefreshControl
     @ViewBuilder let navigationBar: () -> NavigationBar
     @ViewBuilder let balanceView: () -> BalanceView
@@ -37,11 +32,15 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
             ScrollView {
                 ZStack {
                     VStack(spacing: 0) {
-                        Color.clear.frame(height: Dimensions.balanceAreaHeight)
+                        Color.black.frame(height: Dimensions.balanceAreaHeight)
                             .overlay(alignment: .center, content: balanceView)
 
                         LazyVStack(spacing: 0, content: contentView)
                             .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+                            .background(
+                                Color.white.clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+                            )
+                            .background(Color.black)
                     }
 
                     GeometryReader { proxy in
@@ -52,44 +51,38 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
             }
             .coordinateSpace(name: mainScrollViewCoordinatesID)
             .onPreferenceChange(ScrollViewOffsetPreferenceKey.self) { value in
-                // to prevent jumps in pull-to-refresh
-                if abs(offset - value) > 50, isInRefresh != isRefreshControlActive {
-                    isInRefresh.toggle()
-                }
-
+                didScrollOnce = didScrollOnce || offset != 0
                 offset = value
                 isBalanceInNavigationBarTitleVisible = -value >= 98
             }
             .background(
                 VStack(spacing: 0) {
                     Color.black
-                        .frame(
-                            height: max(
-                                offset
-                                    + Dimensions.balanceAreaHeight
-                                    + (isInRefresh ? Dimensions.refreshControlHeight : 0),
-                                0
-                            ),
-                            alignment: .top
-                        )
+                        .frame(height: Dimensions.balanceAreaHeight, alignment: .top)
 
-                    Color.white
-                        .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
-                        .containerSizeChanged { size in
-                            if containerHeight == 0.0 {
-                                containerHeight = size.height
-                            }
+                    Group {
+                        offset > 0 ? Color.black : Color.white
+                    }
+                    .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+                    .containerSizeChanged { size in
+                        if containerHeight == 0.0 {
+                            containerHeight = size.height
                         }
+                    }
                 }
                 .ignoresSafeArea()
             )
             .cornerRadius(16)
             .ignoresSafeArea(.container)
             .overlay {
+                // Backport for pull-to-refresh on iOS 14
                 ScrollViewFinderView { scrollView in
-                    scrollView.refreshControl = refreshControl
+                    if scrollView.refreshControl != refreshControl {
+                        scrollView.refreshControl = refreshControl
+                    }
                 }
                 .frame(height: 0)
+                .id("_scrollview_finder_\(didScrollOnce ? "appear" : "disappear")")
             }
         }
         .background(
@@ -114,7 +107,15 @@ private struct ScrollViewFinderView: UIViewRepresentable {
 
         override func didMoveToWindow() {
             super.didMoveToWindow()
+            findScrollView()
+        }
 
+        override func didMoveToSuperview() {
+            super.didMoveToSuperview()
+            findScrollView()
+        }
+
+        func findScrollView() {
             func traverse(_ view: UIView) -> UIScrollView? {
                 if let scrollView = view as? UIScrollView {
                     return scrollView
