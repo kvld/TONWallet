@@ -8,12 +8,16 @@ public struct FormattedGram {
     public let integer: String
     public let fractional: String?
 
+    private static var separator: String {
+        Locale.current.decimalSeparator ?? "."
+    }
+
     public var formatted: String {
         "\(integer)" + formattedFractionalOrEmpty
     }
 
     public var formattedFractionalOrEmpty: String {
-        fractional == nil ? "" : ".\(fractional!)"
+        fractional == nil ? "" : "\(Self.separator)\(fractional!)"
     }
 }
 

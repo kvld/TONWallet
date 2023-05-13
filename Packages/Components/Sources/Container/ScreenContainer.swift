@@ -16,6 +16,7 @@ public enum NavigationBarVisibilityState {
 public enum NavigationBarButton {
     case back
     case cancel
+    case done
 }
 
 public final class ScreenContainerProxy {
@@ -37,27 +38,39 @@ public struct ScreenContainer<Content: View>: View {
 
     private let navigationBarTitle: String?
     private let navigationBarVisibility: NavigationBarVisibilityState
-    private let navigationBarLeftButton: NavigationBarButton
+    private let navigationBarLeftButton: NavigationBarButton?
+    private let navigationBarRightButton: NavigationBarButton?
+    private let navigationBarTitleAlwaysVisible: Bool
     private let wrapInScrollView: Bool
+    private let extendBarHeight: Bool
+    private let backgroundColor: Color
 
     @State private var scrollOffset: CGFloat = 0
     @State private var navigationBarTitleAnchorOffset: CGFloat = 0
 
     private var navigationBarHeight: CGFloat {
-        44.0
+        44.0 + (extendBarHeight ? 12.0 : 0.0)
     }
 
     public init(
         navigationBarVisibility: NavigationBarVisibilityState = .visible,
         navigationBarTitle: String? = nil,
-        navigationBarLeftButton: NavigationBarButton = .back,
+        navigationBarTitleAlwaysVisible: Bool = false,
+        navigationBarLeftButton: NavigationBarButton? = .back,
+        navigationBarRightButton: NavigationBarButton? = nil,
+        extendBarHeight: Bool = false,
         wrapInScrollView: Bool = true,
+        backgroundColor: Color = .white,
         @ViewBuilder content: @escaping (ScreenContainerProxy) -> Content
     ) {
         self.navigationBarVisibility = navigationBarVisibility
         self.navigationBarTitle = navigationBarTitle
+        self.navigationBarTitleAlwaysVisible = navigationBarTitleAlwaysVisible
         self.navigationBarLeftButton = navigationBarLeftButton
+        self.navigationBarRightButton = navigationBarRightButton
         self.wrapInScrollView = wrapInScrollView
+        self.extendBarHeight = extendBarHeight
+        self.backgroundColor = backgroundColor
         self.content = content
     }
 
@@ -94,11 +107,12 @@ public struct ScreenContainer<Content: View>: View {
                 .onPreferenceChange(NavigationBarTitleVisibilityAnchorOffsetKey.self) { value in
                     navigationBarTitleAnchorOffset = value
                 }
+                .background(backgroundColor.ignoresSafeArea())
 
                 ZStack(alignment: .top) {
                     let navigationBarOpacity = min(1.0, max(0.0, -scrollOffset / navigationBarHeight))
 
-                    Color.white
+                    backgroundColor
                         .edgesIgnoringSafeArea(.top)
                         .opacity(navigationBarVisibility == .visible ? 1.0 : 0.0)
 
@@ -106,8 +120,10 @@ public struct ScreenContainer<Content: View>: View {
                         if navigationBarVisibility == .visible {
                             NavigationBar(
                                 title: navigationBarTitle,
-                                isTitleVisible: -scrollOffset > navigationBarTitleAnchorOffset,
-                                leftButton: navigationBarLeftButton
+                                isTitleVisible: -scrollOffset > navigationBarTitleAnchorOffset
+                                    || navigationBarTitleAlwaysVisible,
+                                leftButton: navigationBarLeftButton,
+                                rightButton: navigationBarRightButton
                             )
                         } else {
                             EmptyView()
@@ -145,7 +161,8 @@ private struct NavigationBar: View {
 
     let title: String?
     let isTitleVisible: Bool
-    let leftButton: NavigationBarButton
+    let leftButton: NavigationBarButton?
+    let rightButton: NavigationBarButton?
 
     var body: some View {
         ZStack(alignment: .center) {
@@ -159,6 +176,7 @@ private struct NavigationBar: View {
                                 width: FontConfiguration.body.regular.pointSize * 0.5,
                                 height: FontConfiguration.body.regular.pointSize
                             )
+                            .foregroundColor(Color.accent.app)
 
                         Text("Back")
                             .fontConfiguration(.body.regular)
@@ -170,6 +188,9 @@ private struct NavigationBar: View {
                             .fontConfiguration(.body.regular)
                             .frame(height: FontConfiguration.body.regular.pointSize)
                             .padding(.leading, 7)
+
+                    case .done, .none:
+                        EmptyView()
                     }
                 }
                 .onTapWithFeedback {
@@ -179,6 +200,24 @@ private struct NavigationBar: View {
                 .padding(.leading, 9)
 
                 Spacer()
+
+                HStack(spacing: 0) {
+                    switch rightButton {
+                    case .back, .cancel, .none:
+                        EmptyView()
+
+                    case .done:
+                        Text("Done")
+                            .fontConfiguration(.body.semibold)
+                            .frame(height: FontConfiguration.body.semibold.pointSize)
+                            .padding(.trailing, 7)
+                    }
+                }
+                .onTapWithFeedback {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .foregroundColor(Color.accent.app)
+                .padding(.trailing, 9)
             }
 
             HStack(alignment: .center, spacing: 8) {

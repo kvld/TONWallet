@@ -48,7 +48,7 @@ struct MainView: View {
                         )
                     )
 
-                Button("Send", action: { })
+                Button("Send", action: { viewModel.showSend() })
                     .buttonStyle(
                         .action(
                             color: .accentMain,
@@ -86,7 +86,7 @@ struct MainView: View {
 
         case let .idle(model):
             if model.transactions.isEmpty {
-                EmptyStateView()
+                EmptyStateView(address: model.address.full)
                     .frame(height: containerHeight, alignment: .center)
                     .padding(.top, -56)
             } else {

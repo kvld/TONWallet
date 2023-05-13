@@ -23,7 +23,7 @@ protocol Wallet: Contract {
 
 final class WalletV4R2: Wallet {
     private let workchain: Int
-    private let defaultWalletID: Int
+    private let walletID: Int
     private let publicKey: Data
 
     var type: WalletType { .v4r2 }
@@ -39,28 +39,28 @@ final class WalletV4R2: Wallet {
 
     var data: Cell {
         get throws {
-            var cell = Cell()
+            let cell = Cell()
             try cell.bits.append(0, width: 32)
-            try cell.bits.append(defaultWalletID + workchain, width: 32)
+            try cell.bits.append(walletID + workchain, width: 32)
             try cell.bits.append(publicKey)
             try cell.bits.append(._0)
             return cell
         }
     }
 
-    init(workchain: Int, defaultWalletID: Int, publicKey: Data) {
+    init(workchain: Int, walletID: Int, publicKey: Data) {
         self.workchain = workchain
-        self.defaultWalletID = defaultWalletID
+        self.walletID = walletID
         self.publicKey = publicKey
     }
 }
 
 final class WalletV3R2: Contract, Wallet {
     private let workchain: Int
-    private let defaultWalletID: Int
+    private let walletID: Int
     private let publicKey: Data
 
-    var type: WalletType { .v3r1 }
+    var type: WalletType { .v3r2 }
 
     var code: Cell {
         get throws {
@@ -73,27 +73,27 @@ final class WalletV3R2: Contract, Wallet {
 
     var data: Cell {
         get throws {
-            var cell = Cell()
+            let cell = Cell()
             try cell.bits.append(0, width: 32)
-            try cell.bits.append(defaultWalletID + workchain, width: 32)
+            try cell.bits.append(walletID + workchain, width: 32)
             try cell.bits.append(publicKey)
             return cell
         }
     }
 
-    init(workchain: Int, defaultWalletID: Int, publicKey: Data) {
+    init(workchain: Int, walletID: Int, publicKey: Data) {
         self.workchain = workchain
-        self.defaultWalletID = defaultWalletID
+        self.walletID = walletID
         self.publicKey = publicKey
     }
 }
 
 final class WalletV3R1: Contract, Wallet {
     private let workchain: Int
-    private let defaultWalletID: Int
+    private let walletID: Int
     private let publicKey: Data
 
-    var type: WalletType { .v3r2 }
+    var type: WalletType { .v3r1 }
 
     var code: Cell {
         get throws {
@@ -106,17 +106,17 @@ final class WalletV3R1: Contract, Wallet {
 
     var data: Cell {
         get throws {
-            var cell = Cell()
+            let cell = Cell()
             try cell.bits.append(0, width: 32)
-            try cell.bits.append(defaultWalletID + workchain, width: 32)
+            try cell.bits.append(walletID + workchain, width: 32)
             try cell.bits.append(publicKey)
             return cell
         }
     }
 
-    init(workchain: Int, defaultWalletID: Int, publicKey: Data) {
+    init(workchain: Int, walletID: Int, publicKey: Data) {
         self.workchain = workchain
-        self.defaultWalletID = defaultWalletID
+        self.walletID = walletID
         self.publicKey = publicKey
     }
 }

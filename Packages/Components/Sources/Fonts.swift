@@ -7,10 +7,10 @@ import SwiftUI
 import UIKit
 
 public struct FontConfiguration {
-    let pointSize: CGFloat
-    let weight: Font.Weight
-    let lineHeight: CGFloat?
-    let design: Font.Design
+    public let pointSize: CGFloat
+    public let weight: Font.Weight
+    public let lineHeight: CGFloat?
+    public let design: Font.Design
 }
 
 extension FontConfiguration {

@@ -1,0 +1,346 @@
+diff --git a/crypto/CMakeLists.txt b/crypto/CMakeLists.txt
+index 598169f..e208068 100644
+--- a/crypto/CMakeLists.txt
++++ b/crypto/CMakeLists.txt
+@@ -222,6 +222,7 @@ set(SMC_ENVELOPE_SOURCE
+   smc-envelope/SmartContractCode.cpp
+   smc-envelope/WalletInterface.cpp
+   smc-envelope/WalletV3.cpp
++  smc-envelope/WalletV4.cpp
+ 
+   smc-envelope/GenericAccount.h
+   smc-envelope/HighloadWallet.h
+@@ -232,6 +233,7 @@ set(SMC_ENVELOPE_SOURCE
+   smc-envelope/SmartContractCode.h
+   smc-envelope/WalletInterface.h
+   smc-envelope/WalletV3.h
++  smc-envelope/WalletV4.h
+ )
+ 
+ set(ED25519_TEST_SOURCE
+diff --git a/crypto/smc-envelope/SmartContractCode.cpp b/crypto/smc-envelope/SmartContractCode.cpp
+index d10c4b5..8c43df6 100644
+--- a/crypto/smc-envelope/SmartContractCode.cpp
++++ b/crypto/smc-envelope/SmartContractCode.cpp
+@@ -69,6 +69,30 @@ const auto& get_map() {
+     with_tvm_code("wallet3-r2",
+                   "te6ccgEBAQEAcQAA3v8AIN0gggFMl7ohggEznLqxn3Gw7UTQ0x/THzHXC//jBOCk8mCDCNcYINMf0x/TH/gjE7vyY+1E0NMf0x/"
+                   "T/9FRMrryoVFEuvKiBPkBVBBV+RDyo/gAkyDXSpbTB9QC+wDo0QGkyMsfyx/L/8ntVA==");
++    with_tvm_code("wallet4-r1",
++                  "te6cckECFQEAAvUAART/APSkE/S88sgLAQIBIAIDAgFIBAUE+PKDCNcYINMf0x/THwL4I7vyY+1E0NMf0x/T//QE0VFDuvKhU"
++                  "VG68qIF+QFUEGT5EPKj+AAkpMjLH1JAyx9SMMv/UhD0AMntVPgPAdMHIcAAn2xRkyDXSpbTB9QC+wDoMOAhwAHjACHAAuMAAcA"
++                  "DkTDjDQOkyMsfEssfy/8REhMUA+7QAdDTAwFxsJFb4CHXScEgkVvgAdMfIYIQcGx1Z70ighBibG5jvbAighBkc3RyvbCSXwPgA"
++                  "vpAMCD6RAHIygfL/8nQ7UTQgQFA1yH0BDBcgQEI9ApvoTGzkl8F4ATTP8glghBwbHVnupEx4w0kghBibG5juuMABAYHCAIBIAkK"
++                  "AFAB+gD0BDCCEHBsdWeDHrFwgBhQBcsFJ88WUAP6AvQAEstpyx9SEMs/AFL4J28ighBibG5jgx6xcIAYUAXLBSfPFiT6AhTLahPL"
++                  "H1Iwyz8B+gL0AACSghBkc3Ryuo41BIEBCPRZMO1E0IEBQNcgyAHPFvQAye1UghBkc3Rygx6xcIAYUATLBVjPFiL6AhLLassfyz+UE"
++                  "DRfBOLJgED7AAIBIAsMAFm9JCtvaiaECAoGuQ+gIYRw1AgIR6STfSmRDOaQPp/5g3gSgBt4EBSJhxWfMYQCAVgNDgARuMl+1E0NcL"
++                  "H4AD2ynftRNCBAUDXIfQEMALIygfL/8nQAYEBCPQKb6ExgAgEgDxAAGa3OdqJoQCBrkOuF/8AAGa8d9qJoQBBrkOuFj8AAbtIH+gD"
++                  "U1CL5AAXIygcVy//J0Hd0gBjIywXLAiLPFlAF+gIUy2sSzMzJcfsAyEAUgQEI9FHypwIAbIEBCNcYyFQgJYEBCPRR8qeCEG5vdGVw"
++                  "dIAYyMsFywJQBM8WghAF9eEA+gITy2oSyx/JcfsAAgBygQEI1xgwUgKBAQj0WfKn+CWCEGRzdHJwdIAYyMsFywJQBc8WghAF9eEA+g"
++                  "IUy2oTyx8Syz/Jc/sAAAr0AMntVEap808=");
++    with_tvm_code("wallet4-r2",
++                  "te6cckECFAEAAtQAART/APSkE/S88sgLAQIBIAIDAgFIBAUE+PKDCNcYINMf0x/THwL4I7vyZO1E0NMf0x/"
++                  "T//QE0VFDuvKhUVG68qIF+QFUEGT5EPKj+AAkpMjLH1JAyx9SMMv/UhD0AMntVPgPAdMHIcAAn2xRkyDXSpb"
++                  "TB9QC+wDoMOAhwAHjACHAAuMAAcADkTDjDQOkyMsfEssfy/8QERITAubQAdDTAyFxsJJfBOAi10nBIJJfBOAC"
++                  "0x8hghBwbHVnvSKCEGRzdHK9sJJfBeAD+kAwIPpEAcjKB8v/ydDtRNCBAUDXIfQEMFyBAQj0Cm+hMbOSXwfgBdM"
++                  "/yCWCEHBsdWe6kjgw4w0DghBkc3RyupJfBuMNBgcCASAICQB4AfoA9AQw+CdvIjBQCqEhvvLgUIIQcGx1Z4MesXCAG"
++                  "FAEywUmzxZY+gIZ9ADLaRfLH1Jgyz8gyYBA+wAGAIpQBIEBCPRZMO1E0IEBQNcgyAHPFvQAye1UAXKwjiOCEGRzdHKD"
++                  "HrFwgBhQBcsFUAPPFiP6AhPLassfyz/JgED7AJJfA+ICASAKCwBZvSQrb2omhAgKBrkPoCGEcNQICEekk30pkQzmkD6f"
++                  "+YN4EoAbeBAUiYcVnzGEAgFYDA0AEbjJftRNDXCx+AA9sp37UTQgQFA1yH0BDACyMoHy//J0AGBAQj0Cm+hMYAIBIA4"
++                  "PABmtznaiaEAga5Drhf/AABmvHfaiaEAQa5DrhY/AAG7SB/oA1NQi+QAFyMoHFcv/ydB3dIAYyMsFywIizxZQBfoCFMt"
++                  "rEszMyXP7AMhAFIEBCPRR8qcCAHCBAQjXGPoA0z/IVCBHgQEI9FHyp4IQbm90ZXB0gBjIywXLAlAGzxZQBPoCFMtqEssf"
++                  "yz/Jc/sAAgBsgQEI1xj6ANM/MFIkgQEI9Fnyp4IQZHN0cnB0gBjIywXLAlAFzxZQA/oCE8tqyx8Syz/Jc/sAAAr0AMntVGliJeU=");
+     with_tvm_code(
+         "dns-manual-r1",
+         "te6ccgECGAEAAtAAART/APSkE/S88sgLAQIBIAIDAgFIBAUC7PLbPAWDCNcYIPkBAdMf0z/"
+@@ -109,6 +133,10 @@ td::Result<td::Ref<vm::Cell>> SmartContractCode::load(td::Slice name) {
+ 
+ td::Span<int> SmartContractCode::get_revisions(Type type) {
+   switch (type) {
++    case Type::WalletV4: {
++      static int res[] = {1, 2};
++      return res;
++    }
+     case Type::WalletV3: {
+       static int res[] = {1, 2};
+       return res;
+@@ -165,6 +193,8 @@ td::Ref<vm::Cell> SmartContractCode::get_code(Type type, int ext_revision) {
+   auto revision = validate_revision(type, ext_revision).move_as_ok();
+   auto basename = [](Type type) -> td::Slice {
+     switch (type) {
++      case Type::WalletV4:
++        return "wallet4";
+       case Type::WalletV3:
+         return "wallet3";
+       case Type::HighloadWalletV1:
+diff --git a/crypto/smc-envelope/SmartContractCode.h b/crypto/smc-envelope/SmartContractCode.h
+index 85be353..ff36cae 100644
+--- a/crypto/smc-envelope/SmartContractCode.h
++++ b/crypto/smc-envelope/SmartContractCode.h
+@@ -26,7 +26,7 @@ class SmartContractCode {
+  public:
+   static td::Result<td::Ref<vm::Cell>> load(td::Slice name);
+ 
+-  enum Type { WalletV3 = 4, HighloadWalletV1, HighloadWalletV2, ManualDns, Multisig, PaymentChannel, RestrictedWallet };
++  enum Type { WalletV3 = 4, HighloadWalletV1, HighloadWalletV2, ManualDns, Multisig, PaymentChannel, RestrictedWallet, WalletV4 };
+   static td::Span<int> get_revisions(Type type);
+   static td::Result<int> validate_revision(Type type, int revision);
+   static td::Ref<vm::Cell> get_code(Type type, int revision = 0);
+diff --git a/crypto/smc-envelope/WalletV4.cpp b/crypto/smc-envelope/WalletV4.cpp
+new file mode 100644
+index 0000000..f0efeef
+--- /dev/null
++++ b/crypto/smc-envelope/WalletV4.cpp
+@@ -0,0 +1,87 @@
++/*
++    This file is part of TON Blockchain Library.
++
++    TON Blockchain Library is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 2 of the License, or
++    (at your option) any later version.
++
++    TON Blockchain Library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with TON Blockchain Library.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright 2017-2020 Telegram Systems LLP
++*/
++#include "WalletV4.h"
++#include "GenericAccount.h"
++#include "SmartContractCode.h"
++
++#include "vm/boc.h"
++#include "vm/cells/CellString.h"
++#include "td/utils/base64.h"
++
++#include <limits>
++
++namespace ton {
++td::Result<td::Ref<vm::Cell>> WalletV4::make_a_gift_message(const td::Ed25519::PrivateKey& private_key,
++                                                            td::uint32 valid_until, td::Span<Gift> gifts) const {
++  CHECK(gifts.size() <= get_max_gifts_size());
++  TRY_RESULT(seqno, get_seqno());
++  TRY_RESULT(wallet_id, get_wallet_id());
++  vm::CellBuilder cb;
++  cb.store_long(wallet_id, 32).store_long(valid_until, 32).store_long(seqno, 32).store_long(0, 8);
++
++  for (auto& gift : gifts) {
++    td::int32 send_mode = 3;
++    if (gift.gramms == -1) {
++      send_mode += 128;
++    }
++    if (gift.send_mode > -1) {
++      send_mode = gift.send_mode;
++    }
++    cb.store_long(send_mode, 8).store_ref(create_int_message(gift));
++  }
++
++  auto message_outer = cb.finalize();
++  auto signature = private_key.sign(message_outer->get_hash().as_slice()).move_as_ok();
++  return vm::CellBuilder().store_bytes(signature).append_cellslice(vm::load_cell_slice(message_outer)).finalize();
++}
++
++td::Ref<vm::Cell> WalletV4::get_init_data(const InitData& init_data) noexcept {
++  return vm::CellBuilder()
++      .store_long(init_data.seqno, 32)
++      .store_long(init_data.wallet_id, 32)
++      .store_bytes(init_data.public_key)
++      .store_long(0, 1)
++      .finalize();
++}
++
++td::Result<td::uint32> WalletV4::get_wallet_id() const {
++  return TRY_VM([&]() -> td::Result<td::uint32> {
++    if (state_.data.is_null()) {
++      return 0;
++    }
++    auto cs = vm::load_cell_slice(state_.data);
++    cs.skip_first(32);
++    return static_cast<td::uint32>(cs.fetch_ulong(32));
++  }());
++}
++
++td::Result<td::Ed25519::PublicKey> WalletV4::get_public_key() const {
++  return TRY_VM([&]() -> td::Result<td::Ed25519::PublicKey> {
++    if (state_.data.is_null()) {
++      return td::Status::Error("data is null");
++    }
++    auto cs = vm::load_cell_slice(state_.data);
++    cs.skip_first(64);
++    td::SecureString res(td::Ed25519::PublicKey::LENGTH);
++    cs.fetch_bytes(res.as_mutable_slice().ubegin(), td::narrow_cast<td::int32>(res.size()));
++    return td::Ed25519::PublicKey(std::move(res));
++  }());
++}
++
++}  // namespace ton
+diff --git a/crypto/smc-envelope/WalletV4.h b/crypto/smc-envelope/WalletV4.h
+new file mode 100644
+index 0000000..d0f4236
+--- /dev/null
++++ b/crypto/smc-envelope/WalletV4.h
+@@ -0,0 +1,50 @@
++/*
++    This file is part of TON Blockchain Library.
++
++    TON Blockchain Library is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 2 of the License, or
++    (at your option) any later version.
++
++    TON Blockchain Library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with TON Blockchain Library.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright 2017-2020 Telegram Systems LLP
++*/
++#pragma once
++
++#include "smc-envelope/SmartContract.h"
++#include "smc-envelope/WalletInterface.h"
++#include "vm/cells.h"
++#include "Ed25519.h"
++#include "block/block.h"
++#include "vm/cells/CellString.h"
++
++namespace ton {
++
++struct WalletV4Traits {
++  using InitData = WalletInterface::DefaultInitData;
++
++  static constexpr unsigned max_message_size = vm::CellString::max_bytes;
++  static constexpr unsigned max_gifts_size = 4;
++  static constexpr auto code_type = SmartContractCode::WalletV4;
++};
++
++class WalletV4 : public WalletBase<WalletV4, WalletV4Traits> {
++ public:
++  explicit WalletV4(State state) : WalletBase(std::move(state)) {
++  }
++  td::Result<td::Ref<vm::Cell>> make_a_gift_message(const td::Ed25519::PrivateKey& private_key, td::uint32 valid_until,
++                                                    td::Span<Gift> gifts) const override;
++  static td::Ref<vm::Cell> get_init_data(const InitData& init_data) noexcept;
++
++  // can't use get methods for compatibility with old revisions
++  td::Result<td::uint32> get_wallet_id() const override;
++  td::Result<td::Ed25519::PublicKey> get_public_key() const override;
++};
++}  // namespace ton
+\ No newline at end of file
+diff --git a/tonlib/tonlib/TonlibClient.cpp b/tonlib/tonlib/TonlibClient.cpp
+index a2dfa9c..ae2f1b0 100644
+--- a/tonlib/tonlib/TonlibClient.cpp
++++ b/tonlib/tonlib/TonlibClient.cpp
+@@ -31,6 +31,7 @@
+ #include "smc-envelope/GenericAccount.h"
+ #include "smc-envelope/ManualDns.h"
+ #include "smc-envelope/WalletV3.h"
++#include "smc-envelope/WalletV4.h"
+ #include "smc-envelope/HighloadWallet.h"
+ #include "smc-envelope/HighloadWalletV2.h"
+ #include "smc-envelope/PaymentChannel.h"
+@@ -303,6 +304,17 @@ class AccountState {
+         raw().frozen_hash, get_sync_time());
+   }
+ 
++  // to not to update TL schema
++  td::Result<tonlib_api::object_ptr<tonlib_api::wallet_v3_accountState>> to_wallet_v4_accountState() const {
++    if (wallet_type_ != WalletV4) {
++      return TonlibError::AccountTypeUnexpected("WalletV4");
++    }
++    auto wallet = ton::WalletV4(get_smc_state());
++    TRY_RESULT(seqno, wallet.get_seqno());
++    TRY_RESULT(wallet_id, wallet.get_wallet_id());
++    return tonlib_api::make_object<tonlib_api::wallet_v3_accountState>(static_cast<td::uint32>(wallet_id),
++                                                                       static_cast<td::uint32>(seqno));
++  }
+   td::Result<tonlib_api::object_ptr<tonlib_api::wallet_v3_accountState>> to_wallet_v3_accountState() const {
+     if (wallet_type_ != WalletV3) {
+       return TonlibError::AccountTypeUnexpected("WalletV3");
+@@ -402,6 +414,8 @@ class AccountState {
+         return to_uninited_accountState();
+       case Unknown:
+         return f(to_raw_accountState());
++      case WalletV4:
++        return f(to_wallet_v4_accountState());
+       case WalletV3:
+         return f(to_wallet_v3_accountState());
+       case HighloadWalletV1:
+@@ -447,6 +461,7 @@ class AccountState {
+   enum WalletType {
+     Empty,
+     Unknown,
++    WalletV4,
+     WalletV3,
+     HighloadWalletV1,
+     HighloadWalletV2,
+@@ -467,6 +482,7 @@ class AccountState {
+       case AccountState::ManualDns:
+       case AccountState::PaymentChannel:
+         return false;
++      case AccountState::WalletV4:
+       case AccountState::WalletV3:
+       case AccountState::HighloadWalletV1:
+       case AccountState::HighloadWalletV2:
+@@ -483,6 +499,8 @@ class AccountState {
+       case AccountState::ManualDns:
+       case AccountState::PaymentChannel:
+         return {};
++      case AccountState::WalletV4:
++        return td::make_unique<ton::WalletV4>(get_smc_state());
+       case AccountState::WalletV3:
+         return td::make_unique<ton::WalletV3>(get_smc_state());
+       case AccountState::HighloadWalletV1:
+@@ -591,8 +609,15 @@ class AccountState {
+       return wallet_type_;
+     }
+     auto wallet_id = static_cast<td::uint32>(address_.workchain + wallet_id_);
+-    ton::WalletV3::InitData init_data{key.as_octet_string(), wallet_id};
+-    auto o_revision = ton::WalletV3::guess_revision(address_, init_data);
++    ton::WalletV4::InitData init_data{key.as_octet_string(), wallet_id};
++    auto o_revision = ton::WalletV4::guess_revision(address_, init_data);
++    if (o_revision) {
++      wallet_type_ = WalletType::WalletV4;
++      wallet_revision_ = o_revision.value();
++      set_new_state(ton::WalletV4::get_init_state(wallet_revision_, init_data));
++      return wallet_type_;
++    }
++    o_revision = ton::WalletV3::guess_revision(address_, init_data);
+     if (o_revision) {
+       wallet_type_ = WalletType::WalletV3;
+       wallet_revision_ = o_revision.value();
+@@ -670,7 +695,13 @@ class AccountState {
+       return wallet_type_;
+     }
+     auto code_hash = raw_.code->get_hash();
+-    auto o_revision = ton::WalletV3::guess_revision(code_hash);
++    auto o_revision = ton::WalletV4::guess_revision(code_hash);
++    if (o_revision) {
++      wallet_type_ = WalletType::WalletV4;
++      wallet_revision_ = o_revision.value();
++      return wallet_type_;
++    }
++    o_revision = ton::WalletV3::guess_revision(code_hash);
+     if (o_revision) {
+       wallet_type_ = WalletType::WalletV3;
+       wallet_revision_ = o_revision.value();
+@@ -2379,7 +2410,9 @@ td::Status TonlibClient::do_request(tonlib_api::guessAccount& request,
+               TRY_RESULT(address, get_account_address(state, revision, workchain));
+               Target target;
+               target.can_be_uninited =
+-                  type == ton::SmartContractCode::Type::WalletV3 && revision == 2 && workchain == ton::basechainId;
++                  (type == ton::SmartContractCode::Type::WalletV3 || type == ton::SmartContractCode::Type::WalletV4)
++                    && revision == 2
++                    && workchain == ton::basechainId;
+               target.can_be_empty = type != ton::SmartContractCode::Type::RestrictedWallet || target.can_be_uninited;
+               target.address = address;
+               target.public_key = td::Ed25519::PublicKey(td::SecureString(key_bytes.key));

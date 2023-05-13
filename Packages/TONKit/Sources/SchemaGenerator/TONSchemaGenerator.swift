@@ -7,7 +7,7 @@ import Foundation
 @main
 final class TONSchemaGenerator {
     private static var schemaLink: String {
-        "https://raw.githubusercontent.com/ton-blockchain/ton/3b3c25b654ade3fcea1546d7b91454673038ed4e/tl/generate/scheme/tonlib_api.tl"
+        "https://raw.githubusercontent.com/ton-blockchain/ton/078aabe50e23bd2279bac08c46ac4009b2ae67e5/tl/generate/scheme/tonlib_api.tl"
     }
 
     private static var outputURL: URL {
@@ -169,7 +169,7 @@ final class TONSchemaGenerator {
         lines.append("public struct \(ctorName.generateClassName()): TLObject {")
         lines.append("public static var _type: String { \"\(ctorName)\" }", indent: 1)
 
-        if !args.contains(where: { $0.string.contains(":#") }) {
+        if !args.contains(where: { $0.string.contains("?") }) {
             let parsedArgs = args.dropFirst().map { $0.generateArgument() }
 
             lines.append("")
@@ -268,7 +268,7 @@ final class TONSchemaGenerator {
         lines.append("public static var _type: String { \"\(fnName)\" }", indent: 1)
         lines.append("")
 
-        if !args.contains(where: { $0.string.contains(":#") }) {
+        if !args.contains(where: { $0.string.contains("?") }) {
             let parsedArgs = args.dropFirst().map { $0.generateArgument() }
 
             for (argName, argType) in parsedArgs {
@@ -360,6 +360,7 @@ struct Token: CustomStringConvertible {
 
     func parseArguments() -> [Token] {
         let string = string.replacingOccurrences(of: "vector ", with: "vector<")
+            .replacingOccurrences(of: "#", with: "Int32")
         return string.split(separator: " ").map(String.init).map { $0.trim() }.map(Token.init(string:))
     }
 
@@ -415,7 +416,7 @@ struct Token: CustomStringConvertible {
         case "Int64":
             return (true, "TLInt64")
         case "Int256":
-            return (true, "Int64") // temporary
+            return (true, "String") // temporary
         case "Bytes":
             return (true, "Foundation.Data")
         case "SecureString":

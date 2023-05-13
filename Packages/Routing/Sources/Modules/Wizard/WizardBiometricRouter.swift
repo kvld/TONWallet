@@ -13,4 +13,3 @@ final class WizardBiometricRouter: HostingRouter<AnyView, WizardBiometricModule>
         super.init(view: module.view, module: module)
     }
 }
-

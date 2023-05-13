@@ -15,7 +15,8 @@ let package = Package(
     dependencies: [
         .package(path: "../Main"),
         .package(path: "../Wizard"),
-        .package(path: "../Receive")
+        .package(path: "../Receive"),
+        .package(path: "../Send")
     ],
     targets: [
         .target(
@@ -29,7 +30,12 @@ let package = Package(
                 .product(name: "WizardBiometric", package: "Wizard"),
                 .product(name: "WizardState", package: "Wizard"),
                 .product(name: "WizardInitial", package: "Wizard"),
-                .product(name: "Receive", package: "Receive")
+                .product(name: "Receive", package: "Receive"),
+                .product(name: "SendState", package: "Send"),
+                .product(name: "SendAddress", package: "Send"),
+                .product(name: "SendAmount", package: "Send"),
+                .product(name: "SendConfirm", package: "Send"),
+                .product(name: "SendCompletion", package: "Send")
             ],
             path: "Sources/"
         )

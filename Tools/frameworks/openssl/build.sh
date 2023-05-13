@@ -33,4 +33,4 @@ do
 done
 
 cd ..
-rm Build-OpenSSL-cURL
+rm -rf Build-OpenSSL-cURL

@@ -9,6 +9,8 @@ import Components
 import SwiftUIHelpers
 
 struct EmptyStateView: View {
+    let address: String
+
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             AnimationView(animationName: "created", repeatInfinitely: false)
@@ -25,10 +27,12 @@ struct EmptyStateView: View {
                 .foregroundColor(.text.secondary)
                 .padding(.bottom, 6)
 
-            Text("UQBFz01R2CU7YA8pevUaNIYE\nzi1mRo4cX-r3W2Dwx-WEAoKP")
+            Text(address)
+                .multilineTextAlignment(.center)
                 .fontConfiguration(.body.mono)
                 .foregroundColor(.text.primary)
-                .copyMenu(text: "123")
+                .copyMenu(text: address)
+                .padding(.horizontal, 32)
         }
     }
 }

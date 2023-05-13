@@ -14,7 +14,7 @@ enum MainViewState {
 
     struct Model {
         var isLoading: Bool
-        let canLoadMore: Bool
+        var canLoadMore: Bool
         let balance: FormattedGram
         let address: (full: String, short: String)
         var transactions: [TransactionListModel]
@@ -83,6 +83,10 @@ extension MainViewModel {
 
         output?.showReceive(walletInfo: walletInfo)
     }
+
+    func showSend() {
+        output?.showSend()
+    }
 }
 
 extension MainViewModel {
@@ -126,14 +130,12 @@ extension MainViewModel {
 
         do {
             let walletState = try await Task {
-                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
-                return try await tonService.fetchWalletState(address: testAddress)
+                return try await tonService.fetchWalletState(address: walletInfo.address)
             }.value
 
             let transactions = try await Task {
-                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
                 return try await tonService.fetchTransactions(
-                    address: testAddress,
+                    address: walletInfo.address,
                     fromTransaction: walletState.lastTransactionID
                 )
             }.value
@@ -145,7 +147,7 @@ extension MainViewModel {
                 address: (walletInfo.address.value, walletInfo.address.shortened()),
                 transactions: MainViewState.TransactionListModel.makeList(
                     from: transactions.transactions,
-                    myAddress: Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
+                    myAddress: walletInfo.address
                 )
             )
 
@@ -179,9 +181,8 @@ extension MainViewModel {
 
         do {
             let result: (TransactionID?, MainViewState)? = try await Task {
-                let testAddress = Address("EQCA_LZTaoKvkvTGFegHqISU7dh1AdCI7_IxRFLYCcC4aKqQ")
                 let transactions = try await tonService.fetchTransactions(
-                    address: testAddress,
+                    address: walletInfo.address,
                     fromTransaction: lastTransaction
                 )
 
@@ -207,6 +208,7 @@ extension MainViewModel {
 
                     let newModel = model.with {
                         $0.transactions = allTransactions
+                        $0.canLoadMore = transactions.lastTransaction != nil
                     }
                     return (transactions.lastTransaction, MainViewState.idle(newModel))
                 }
@@ -225,7 +227,10 @@ extension MainViewModel {
 }
 
 extension MainViewState.TransactionListModel {
-    static func makeList(from transactions: [TON.Transaction], myAddress: Address) -> [MainViewState.TransactionListModel] {
+    static func makeList(
+        from transactions: [TON.Transaction],
+        myAddress: Address
+    ) -> [MainViewState.TransactionListModel] {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = .init(identifier: "en_US")
         dateFormatter.dateFormat = "MMMM dd"
@@ -238,6 +243,11 @@ extension MainViewState.TransactionListModel {
         var items: [MainViewState.TransactionListModel] = []
 
         for transaction in transactions {
+            let isIncome = transaction.receiver == myAddress
+            if (isIncome && transaction.sender.value.isEmpty) || (!isIncome && transaction.receiver.value.isEmpty) {
+                continue
+            }
+
             let transactionDate = dateFormatter.string(from: transaction.date)
 
             if date != transactionDate {
@@ -245,7 +255,6 @@ extension MainViewState.TransactionListModel {
                 date = transactionDate
             }
 
-            let isIncome = transaction.receiver == myAddress
             let address = isIncome
                 ? transaction.sender.shortened(partLength: 5)
                 : transaction.receiver.shortened(partLength: 5)

@@ -35,6 +35,7 @@
 		46D6ED8829CD96B300D01330 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		46D6ED8B29CD96B300D01330 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		46D6ED8D29CD96B300D01330 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46E55F4929FEC13A005733A7 /* Send */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Send; path = Packages/Send; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +53,7 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				46E55F4929FEC13A005733A7 /* Send */,
 				4686AFA129FEA80100A7803D /* QRUtils */,
 				4643EDF529FEA1DD00EB828C /* Receive */,
 				4662C76129F51F7200D77E64 /* Wizard */,

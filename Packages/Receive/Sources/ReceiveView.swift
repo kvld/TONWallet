@@ -5,12 +5,13 @@
 import Foundation
 import SwiftUI
 import Components
+import SwiftUIHelpers
 
 struct ReceiveView: View {
     @ObservedObject var viewModel: ReceiveViewModel
 
     var body: some View {
-        ScreenContainer(navigationBarLeftButton: .cancel, wrapInScrollView: false) { _ in
+        ScreenContainer(navigationBarLeftButton: .cancel, extendBarHeight: true, wrapInScrollView: false) { _ in
             VStack(spacing: 0) {
                 Text("Receive Toncoin")
                     .foregroundColor(.text.primary)
@@ -59,9 +60,9 @@ struct ReceiveView: View {
                     )
                 )
                 .padding(.horizontal, 16)
-                .padding(.bottom, 4)
+
+                DeviceRelatedBottomSpacer()
             }
         }
-        .padding(.top, 4)
     }
 }

@@ -6,6 +6,7 @@ import Foundation
 import Main
 import SwiftUI
 import WizardState
+import SendState
 import TON
 
 public final class MainRouter: HostingRouter<AnyView, MainModule> {
@@ -46,6 +47,23 @@ extension MainRouter: MainModuleOutput {
 
 
         let router = ReceiveRouter(parentNavigationRouter: parentNavigationRouter, walletInfo: walletInfo)
+        parentNavigationRouter.present(router: router)
+    }
+
+    public func showSend() {
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let tonService = TONService(
+            storage: .init(),
+            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
+        )
+        let walletInfoService = WalletInfoService(storage: .init())
+
+        let viewModel = SendViewModel(tonService: tonService, walletInfoService: walletInfoService)
+
+        let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
 }

@@ -63,6 +63,10 @@ extension WalletInfoService {
         _walletFetchState.eraseToAnyPublisher()
     }
 
+    public var lastKnownWallet: WalletFetchState {
+        _walletFetchState.value
+    }
+
     public func updateWallet(with walletInfo: WalletInfo) throws {
         let uuid = walletInfo.uuid
 

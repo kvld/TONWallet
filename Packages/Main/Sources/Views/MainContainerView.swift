@@ -61,7 +61,7 @@ struct MainContainerView<NavigationBar: View, BalanceView: View, ContentView: Vi
                         .frame(height: Dimensions.balanceAreaHeight, alignment: .top)
 
                     Group {
-                        offset > 0 ? Color.black : Color.white
+                        offset > containerHeight / 2 ? Color.black : Color.white
                     }
                     .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
                     .containerSizeChanged { size in

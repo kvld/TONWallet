@@ -8,12 +8,16 @@ import TONClient
 import TONSchema
 import Combine
 import Storage
+import BOC
+import CryptoKit
 
 public final class TONService {
+    public typealias QueryHashType = Bytes
+
     private let _client: TONClient
     private var _configInfo = CurrentValueSubject<OptionsConfigInfo?, Never>(nil)
 
-    private let cachedState: StorageItemWrapper<CachedState>?
+    private var cachedDNSRootAddress: Address?
 
     private let configURL: URL
 
@@ -43,12 +47,6 @@ public final class TONService {
     ) {
         self._client = client
         self.configURL = configURL
-
-        self.cachedState = storage.retrieve(
-            with: .cachedState,
-            defaultValue: .default,
-            constrainTypeWith: .unsafe
-        )
 
         Task {
             try await loadConfig()
@@ -84,17 +82,23 @@ public final class TONService {
 
 extension TONService {
     public func createWallet() async throws -> WalletInfo {
-        let generator = try MnemonicGenerator()
+        let createKeyRequest = CreateNewKey(
+            localPassword: .init(),
+            mnemonicPassword: .init(),
+            randomExtraSeed: .init()
+        )
 
-        let words = try await generator.generateMnemonic()
-        let seed = try await generator.generateSeed(from: words)
+        let key = try await client.execute(createKeyRequest)
+        let inputKey: InputKey = .inputKeyRegular(.init(key: key, localPassword: .init()))
 
-        let (privateKey, secretKey) = try await generator.generateKeyPair(from: seed)
-        let publicKey = try privateKey.publicKey
+        let exportedKey = try await client.execute(ExportKey(inputKey: inputKey))
+        let privateKey = try await client.execute(ExportUnencryptedKey(inputKey: inputKey))
+
+        let publicKey = PublicKey(encryptedKey: key.publicKey)
 
         let wallet = try await WalletFactory.makeWallet(
             workchain: 0,
-            defaultWalletID: Int(configInfo.defaultWalletId.value),
+            walletID: Int(configInfo.defaultWalletId.value),
             publicKey: publicKey
         )
 
@@ -111,14 +115,15 @@ extension TONService {
 
         let address = try await client.execute(accountAddressRequest)
 
-        return .init(
+        return try await .init(
             uuid: .init(),
+            walletID: Int(configInfo.defaultWalletId.value),
             address: .init(address.accountAddress),
             keys: .init(
                 privateKey: privateKey.data,
-                secretKey: secretKey,
+                secretKey: key.secret,
                 publicKey: publicKey,
-                mnemonicWords: words
+                mnemonicWords: exportedKey.wordList
             )
         )
     }
@@ -135,7 +140,6 @@ extension TONService {
             hash: stateResponse.lastTransactionId.hash
         )
 
-        cachedState?.value.lastKnownTransaction = lastTransaction
         return .init(balance: .init(stateResponse.balance.value), lastTransactionID: lastTransaction)
     }
 
@@ -161,6 +165,17 @@ extension TONService {
         let transactions = response.transactions.map { tr -> Transaction in
             let msg = tr.outMsgs.first ?? tr.inMsg
 
+            var message: String?
+
+            switch msg.msgData {
+            case let .msgDataDecryptedText(text):
+                message = !text.text.isEmpty ? String(data: text.text, encoding: .utf8) : nil
+            case let .msgDataText(text):
+                message = !text.text.isEmpty ? String(data: text.text, encoding: .utf8) : nil
+            default:
+                message = nil
+            }
+
             return Transaction(
                 id: .init(lt: tr.transactionId.lt.value, hash: tr.transactionId.hash),
                 sender: .init(msg.source.accountAddress),
@@ -168,14 +183,166 @@ extension TONService {
                 amount: .init(msg.value.value),
                 fee: .init(tr.fee.value),
                 date: .init(timeIntervalSince1970: TimeInterval(tr.utime)),
-                message: nil
+                message: message
             )
         }
 
         return (transactions, lastTransaction)
     }
-}
 
-extension StorageKey {
-    static var cachedState: StorageKey { .init("cachedTONState") }
+    public func resolveDNS(domain: String) async throws -> Address? {
+        if cachedDNSRootAddress == nil {
+            let configInfo = try await client.execute(GetConfigParam(mode: 0, param: 4))
+            let configCell = try Cell(boc: configInfo.config.bytes)
+
+            let packAddressRequest = try PackAccountAddress(
+                accountAddress: .init(
+                    workchainId: -1,
+                    bounceable: true,
+                    testnet: false,
+                    addr: Data(hexString: configCell.bits.convertToHexString()) ?? .init()
+                )
+            )
+            let rootDNSAddress = try await client.execute(packAddressRequest)
+            cachedDNSRootAddress = .init(rootDNSAddress.accountAddress)
+        }
+
+        guard let cachedDNSRootAddress else {
+            return nil
+        }
+
+        var sha = SHA256()
+        sha.update(data: "wallet".data(using: .utf8).unsafelyUnwrapped)
+
+        let resolveRequest = DnsResolve(
+            accountAddress: .init(accountAddress: cachedDNSRootAddress.value),
+            name: domain,
+            category: Data(sha.finalize()).base64EncodedString(),
+            ttl: 10
+        )
+
+        do {
+            let resolvedName = try await client.execute(resolveRequest)
+
+            for entry in resolvedName.entries {
+                if case let .dnsEntryDataSmcAddress(address) = entry.entry {
+                    return .init(address.smcAddress.accountAddress)
+                }
+            }
+
+            return nil
+        } catch {
+            // get method failed -> there is no address
+            return nil
+        }
+    }
+
+    public func initQuery(
+        walletInfo: WalletInfo,
+        destination: Address,
+        amount: Nanogram,
+        message: String? = nil
+    ) async throws -> Swift.Int64 {
+        let rawAccount = try await client.execute(
+            RawGetAccountState(accountAddress: .init(accountAddress: walletInfo.address.value))
+        )
+
+        let code: Bytes
+        let data: Bytes
+        if rawAccount.code.isEmpty || rawAccount.data.isEmpty {
+            let wallet = WalletFactory.makeWallet(
+                type: walletInfo.type,
+                workchain: 0,
+                walletID: walletInfo.walletID,
+                publicKey: walletInfo.keys.publicKey
+            )
+
+            code = try wallet.code.serializeAsBoC(hasCRC32: true)
+            data = try wallet.data.serializeAsBoC(hasCRC32: true)
+        } else {
+            code = rawAccount.code
+            data = rawAccount.data
+        }
+
+        let initialAccountState = RawInitialAccountState(code: code, data: data)
+        let message = message.flatMap { $0.data(using: .utf8) } ?? .init()
+
+        let query = CreateQuery(
+            privateKey: .inputKeyRegular(
+                .init(
+                    key: .init(
+                        publicKey: walletInfo.keys.publicKey.encryptedKey,
+                        secret: walletInfo.keys.secretKey
+                    ),
+                    localPassword: .init()
+                )
+            ),
+            address: .init(accountAddress: walletInfo.address.value),
+            timeout: 300,
+            action: .actionMsg(
+                .init(
+                    messages: [
+                        .init(
+                            destination: .init(accountAddress: destination.value),
+                            publicKey: walletInfo.keys.publicKey.encryptedKey,
+                            amount: .init(amount.value),
+                            data: .msgDataText(.init(text: message)),
+                            sendMode: 3
+                        )
+                    ],
+                    allowSendToUninited: true
+                )
+            ),
+            initialAccountState: .rawInitialAccountState(initialAccountState)
+        )
+
+        let queryInfo = try await client.execute(query)
+
+        return queryInfo.id
+    }
+
+    public func getEstimatedFee(for queryID: Swift.Int64) async throws -> Nanogram {
+        let feesRequest = QueryEstimateFees(id: queryID, ignoreChksig: true)
+        let result = try await client.execute(feesRequest)
+
+        let sum: Swift.Int64 = result.sourceFees.storageFee
+            + result.sourceFees.fwdFee
+            + result.sourceFees.gasFee
+            + result.sourceFees.inFwdFee
+
+        return .init(sum)
+    }
+
+    public func sendQuery(with queryID: Swift.Int64) async throws {
+        let sendMessage = QuerySend(id: queryID)
+        _ = try await client.execute(sendMessage)
+    }
+
+    public func pollForNewTransaction(
+        sourceAddress: Address,
+        timeout: TimeInterval = 60.0
+    ) async throws -> Bool {
+        let deadline = Date(timeIntervalSinceNow: timeout)
+
+        let lastTransactionHash = try await client.execute(
+            GetAccountState(accountAddress: .init(accountAddress: sourceAddress.value))
+        ).lastTransactionId.hash
+
+        while true {
+            if deadline < Date() {
+                return false
+            }
+
+            let stateRequest = GetAccountState(accountAddress: .init(accountAddress: sourceAddress.value))
+            let state = try await client.execute(stateRequest)
+
+            if state.lastTransactionId.hash != lastTransactionHash {
+                return true
+            }
+
+            try await Task.sleep(nanoseconds: 3 * 1_000_000_000)
+
+            try Task.checkCancellation()
+        }
+    }
 }
