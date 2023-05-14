@@ -97,6 +97,9 @@ struct MainView: View {
                     case let .transaction(info):
                         EmptyView()
                         TransactionListItemView(model: info).padding(.horizontal, 16)
+                            .onTapWithHighlight {
+                                viewModel.showTransactionDetail(id: item.id)
+                            }
                         Divider().background(Color.separator).padding(.leading, 16)
                     }
                 }

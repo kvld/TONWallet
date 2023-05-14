@@ -38,6 +38,7 @@ enum MainViewState {
             let fee: FormattedGram
             let time: String
             let message: String?
+            fileprivate let _rawTransaction: TON.Transaction
         }
 
         var id: String {
@@ -224,6 +225,20 @@ extension MainViewModel {
             // todo: retry
         }
     }
+
+    @MainActor
+    func showTransactionDetail(id: String) {
+        guard case let .idle(model) = state else {
+            return
+        }
+
+        guard let item = model.transactions.first(where: { $0.id == id }),
+              case let .transaction(transaction) = item else {
+            return
+        }
+
+        output?.showTransaction(transaction._rawTransaction)
+    }
 }
 
 extension MainViewState.TransactionListModel {
@@ -237,13 +252,13 @@ extension MainViewState.TransactionListModel {
 
         let timeFormatter = DateFormatter()
         timeFormatter.locale = .init(identifier: "en_US")
-        timeFormatter.dateFormat = "HH:mm"
+        timeFormatter.dateFormat = "h:mm a"
 
         var date: String?
         var items: [MainViewState.TransactionListModel] = []
 
         for transaction in transactions {
-            let isIncome = transaction.receiver == myAddress
+            let isIncome = transaction.isIncome
             if (isIncome && transaction.sender.value.isEmpty) || (!isIncome && transaction.receiver.value.isEmpty) {
                 continue
             }
@@ -266,7 +281,8 @@ extension MainViewState.TransactionListModel {
                 address: address,
                 fee: transaction.fee.formatted,
                 time: timeFormatter.string(from: transaction.date),
-                message: transaction.message
+                message: transaction.message,
+                _rawTransaction: transaction
             )
 
             items.append(.transaction(item))

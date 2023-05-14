@@ -16,7 +16,9 @@ let package = Package(
         .package(path: "../Main"),
         .package(path: "../Wizard"),
         .package(path: "../Receive"),
-        .package(path: "../Send")
+        .package(path: "../Send"),
+        .package(path: "../Sheet"),
+        .package(path: "../Transaction")
     ],
     targets: [
         .target(
@@ -35,7 +37,9 @@ let package = Package(
                 .product(name: "SendAddress", package: "Send"),
                 .product(name: "SendAmount", package: "Send"),
                 .product(name: "SendConfirm", package: "Send"),
-                .product(name: "SendCompletion", package: "Send")
+                .product(name: "SendCompletion", package: "Send"),
+                .product(name: "Sheet", package: "Sheet"),
+                .product(name: "Transaction", package: "Transaction"),
             ],
             path: "Sources/"
         )

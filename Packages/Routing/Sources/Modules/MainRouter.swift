@@ -66,4 +66,9 @@ extension MainRouter: MainModuleOutput {
         let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
+
+    public func showTransaction(_ transaction: TON.Transaction) {
+        let router = TransactionRouter(transaction: transaction)
+        parentNavigationRouter?.present(router: router)
+    }
 }

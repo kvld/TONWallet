@@ -183,7 +183,8 @@ extension TONService {
                 amount: .init(msg.value.value),
                 fee: .init(tr.fee.value),
                 date: .init(timeIntervalSince1970: TimeInterval(tr.utime)),
-                message: message
+                message: message,
+                isIncome: address.value == msg.destination.accountAddress
             )
         }
 

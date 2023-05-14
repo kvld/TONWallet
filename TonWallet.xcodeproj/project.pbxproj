@@ -20,9 +20,11 @@
 		4617F60D29E2B812000A6B7B /* TONKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TONKit; path = Packages/TONKit; sourceTree = "<group>"; };
 		46329A4D29D884CA009B7203 /* RLottie.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = RLottie.xcframework; path = Packages/AnimationView/Frameworks/RLottie.xcframework; sourceTree = "<group>"; };
 		4643EDF529FEA1DD00EB828C /* Receive */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Receive; path = Packages/Receive; sourceTree = "<group>"; };
+		46529DBC2A102A7500E894D0 /* Sheet */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Sheet; path = Packages/Sheet; sourceTree = "<group>"; };
 		4660816129D42BF40027C282 /* Components */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Components; path = Packages/Components; sourceTree = "<group>"; };
 		4662C76029F4761500D77E64 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Services; path = Packages/Services; sourceTree = "<group>"; };
 		4662C76129F51F7200D77E64 /* Wizard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Wizard; path = Packages/Wizard; sourceTree = "<group>"; };
+		466BB6AE2A10618C003159B3 /* TONLibJSON.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TONLibJSON.xcframework; path = Packages/TONKit/Frameworks/TONLibJSON.xcframework; sourceTree = "<group>"; };
 		4686AFA129FEA80100A7803D /* QRUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = QRUtils; path = Packages/QRUtils; sourceTree = "<group>"; };
 		46ACDC7429D404D70020AF32 /* AnimationView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationView; path = Packages/AnimationView; sourceTree = "<group>"; };
 		46AE1D8E29CDA617006A184E /* SwiftUIUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftUIUtils; path = Packages/SwiftUIUtils; sourceTree = "<group>"; };
@@ -36,6 +38,7 @@
 		46D6ED8B29CD96B300D01330 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		46D6ED8D29CD96B300D01330 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		46E55F4929FEC13A005733A7 /* Send */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Send; path = Packages/Send; sourceTree = "<group>"; };
+		46F7D0A12A10353000337AEF /* Transaction */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Transaction; path = Packages/Transaction; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +56,8 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				46F7D0A12A10353000337AEF /* Transaction */,
+				46529DBC2A102A7500E894D0 /* Sheet */,
 				46E55F4929FEC13A005733A7 /* Send */,
 				4686AFA129FEA80100A7803D /* QRUtils */,
 				4643EDF529FEA1DD00EB828C /* Receive */,
@@ -71,6 +76,7 @@
 		46C99D6C29CD9C9D001F0516 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				466BB6AE2A10618C003159B3 /* TONLibJSON.xcframework */,
 				46D4753029E225B300F0229E /* libtonlibjson.0.5.dylib */,
 				46329A4D29D884CA009B7203 /* RLottie.xcframework */,
 			);
@@ -233,6 +239,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -251,7 +258,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -293,6 +300,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -305,7 +313,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -331,6 +339,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -368,6 +377,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

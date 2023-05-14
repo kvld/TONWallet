@@ -156,7 +156,7 @@ private struct ConditionallyScrollView<Content: View>: View {
     }
 }
 
-private struct NavigationBar: View {
+public struct NavigationBar: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     let title: String?
@@ -164,7 +164,19 @@ private struct NavigationBar: View {
     let leftButton: NavigationBarButton?
     let rightButton: NavigationBarButton?
 
-    var body: some View {
+    public init(
+        title: String?,
+        isTitleVisible: Bool,
+        leftButton: NavigationBarButton?,
+        rightButton: NavigationBarButton?
+    ) {
+        self.title = title
+        self.isTitleVisible = isTitleVisible
+        self.leftButton = leftButton
+        self.rightButton = rightButton
+    }
+
+    public var body: some View {
         ZStack(alignment: .center) {
             HStack(alignment: .center, spacing: 8) {
                 HStack(alignment: .center, spacing: 8) {

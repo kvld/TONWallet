@@ -10,6 +10,7 @@ public protocol MainModuleOutput: AnyObject {
     func showWizard()
     func showReceive(walletInfo: WalletInfo)
     func showSend()
+    func showTransaction(_ transaction: TON.Transaction)
 }
 
 public final class MainModule {

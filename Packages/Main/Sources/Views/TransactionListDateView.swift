@@ -19,5 +19,6 @@ struct TransactionListDateView: View {
         .clipped(antialiased: false)
         .padding(.top, 20)
         .padding(.bottom, -2)
+        .zIndex(100)
     }
 }

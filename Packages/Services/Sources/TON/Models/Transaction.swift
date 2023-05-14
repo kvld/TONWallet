@@ -17,4 +17,5 @@ public struct Transaction {
     public let fee: Nanogram
     public let date: Date
     public let message: String?
+    public var isIncome: Bool
 }

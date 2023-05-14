@@ -35,6 +35,10 @@ extension Color {
         Color(red: 60 / 255, green: 60 / 255, blue: 67 / 255, opacity: 0.36)
     }
 
+    public static var tableHighlight: Color {
+        Color(red: 142 / 255, green: 142 / 255, blue: 146 / 255, opacity: 0.24)
+    }
+
     public static var background: Background {
         .init()
     }

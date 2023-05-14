@@ -4,6 +4,7 @@
 
 import UIKit
 import SwiftUI
+import Sheet
 
 @MainActor
 public protocol Router {
@@ -24,5 +25,21 @@ public class HostingRouter<View: SwiftUI.View, Module>: Router {
     init(view: View, module: Module? = nil) {
         self.view = view
         self.module = module
+    }
+}
+
+public class SheetHostingRouter<View: SwiftUI.View, Module>: Router {
+    private let module: Module?
+
+    public let viewController: UIViewController
+
+    init(view: View, module: Module? = nil) {
+        self.module = module
+
+        if #available(iOS 15, *) {
+            viewController = PreferredSizeSheetHostingController(rootView: view)
+        } else {
+            viewController = UIHostingController(rootView: view)
+        }
     }
 }

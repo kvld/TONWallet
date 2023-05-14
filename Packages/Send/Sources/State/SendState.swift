@@ -80,7 +80,7 @@ extension SendViewModel {
 
     @MainActor
     public func updateAmount(with amount: String) {
-        guard let value = Double(amount) else {
+        guard let value = amount.asDouble else {
             state.hasInsufficientFunds = false
             return
         }
@@ -98,7 +98,7 @@ extension SendViewModel {
 
     @MainActor
     public func submit(amount: String) async {
-        guard !state.hasInsufficientFunds, !state.isLoading, let value = Double(amount),
+        guard !state.hasInsufficientFunds, !state.isLoading, let value = amount.asDouble,
               let walletInfo = walletInfoService.lastKnownWallet.walletInfo,
               let destination = state.address else {
             return
@@ -151,5 +151,11 @@ extension SendViewModel {
         _ = try! await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
 
         output?.showTransactionCompleted()
+    }
+}
+
+extension String {
+    fileprivate var asDouble: Double? {
+        Double(replacingOccurrences(of: ",", with: "."))
     }
 }
