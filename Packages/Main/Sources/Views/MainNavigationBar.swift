@@ -6,6 +6,7 @@ import SwiftUI
 import SwiftUIHelpers
 
 struct MainNavigationBar<BalanceView: View>: View {
+    let onScanTap: () -> Void
     @ViewBuilder let balanceView: () -> BalanceView
 
     var body: some View {
@@ -13,9 +14,7 @@ struct MainNavigationBar<BalanceView: View>: View {
             Image("scan")
                 .resizable()
                 .frame(width: 28, height: 28)
-                .onTapWithFeedback {
-
-                }
+                .onTapWithFeedback(action: onScanTap)
 
             Spacer()
 

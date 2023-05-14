@@ -127,6 +127,8 @@ struct MainView: View {
             refreshControl: refreshControl
         ) {
             MainNavigationBar {
+                viewModel.showScanner()
+            } balanceView: {
                 navigationBarBalanceView
             }
         } balanceView: {

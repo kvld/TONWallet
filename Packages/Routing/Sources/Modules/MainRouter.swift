@@ -71,4 +71,13 @@ extension MainRouter: MainModuleOutput {
         let router = TransactionRouter(transaction: transaction)
         parentNavigationRouter?.present(router: router)
     }
+
+    public func showScanner() {
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let router = QRScannerRouter(parentNavigationRouter: parentNavigationRouter, completion: { _ in })
+        parentNavigationRouter.present(router: router)
+    }
 }

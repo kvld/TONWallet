@@ -11,6 +11,7 @@ public protocol MainModuleOutput: AnyObject {
     func showReceive(walletInfo: WalletInfo)
     func showSend()
     func showTransaction(_ transaction: TON.Transaction)
+    func showScanner()
 }
 
 public final class MainModule {

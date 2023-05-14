@@ -239,6 +239,11 @@ extension MainViewModel {
 
         output?.showTransaction(transaction._rawTransaction)
     }
+
+    @MainActor
+    func showScanner() {
+        output?.showScanner()
+    }
 }
 
 extension MainViewState.TransactionListModel {

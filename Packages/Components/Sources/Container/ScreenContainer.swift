@@ -212,24 +212,6 @@ public struct NavigationBar: View {
                 .padding(.leading, 9)
 
                 Spacer()
-
-                HStack(spacing: 0) {
-                    switch rightButton {
-                    case .back, .cancel, .none:
-                        EmptyView()
-
-                    case .done:
-                        Text("Done")
-                            .fontConfiguration(.body.semibold)
-                            .frame(height: FontConfiguration.body.semibold.pointSize)
-                            .padding(.trailing, 7)
-                    }
-                }
-                .onTapWithFeedback {
-                    presentationMode.wrappedValue.dismiss()
-                }
-                .foregroundColor(Color.accent.app)
-                .padding(.trailing, 9)
             }
 
             HStack(alignment: .center, spacing: 8) {
@@ -243,9 +225,33 @@ public struct NavigationBar: View {
                         .transition(.opacity.animation(.easeInOut(duration: 0.15)))
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 77)
+                        .padding(.top, -2)
                 }
 
                 Spacer(minLength: 0)
+            }
+
+            HStack(alignment: .center, spacing: 8) {
+                Spacer()
+
+                HStack(spacing: 0) {
+                    switch rightButton {
+                    case .back, .cancel, .none:
+                        EmptyView()
+
+                    case .done:
+                        Text("Done")
+                            .fontConfiguration(.body.semibold)
+                            .frame(height: FontConfiguration.body.semibold.pointSize)
+                            .padding(.trailing, 7)
+                            .padding(.top, -2)
+                    }
+                }
+                .onTapWithFeedback {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .foregroundColor(Color.accent.app)
+                .padding(.trailing, 9)
             }
         }
     }
