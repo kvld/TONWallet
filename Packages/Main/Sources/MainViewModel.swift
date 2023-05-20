@@ -65,13 +65,13 @@ final class MainViewModel: ObservableObject {
     private var walletInfo: WalletInfo?
     private var cancellables = Set<AnyCancellable>()
 
-    private let walletInfoService: WalletInfoService
+    private let configService: ConfigService
     private let tonService: TONService
 
     @Published var state: MainViewState = .preparing
 
-    init(walletInfoService: WalletInfoService, tonService: TONService) {
-        self.walletInfoService = walletInfoService
+    init(configService: ConfigService, tonService: TONService) {
+        self.configService = configService
         self.tonService = tonService
     }
 }
@@ -98,7 +98,7 @@ extension MainViewModel {
 
         isInitialized = true
 
-        walletInfoService.walletFetchState
+        configService.walletFetchState
             .filter { !$0.isUnknown }
             .sink { [weak self] state in
                 guard let self else {
@@ -243,6 +243,11 @@ extension MainViewModel {
     @MainActor
     func showScanner() {
         output?.showScanner()
+    }
+
+    @MainActor
+    func showSettings() {
+        output?.showSettings()
     }
 }
 

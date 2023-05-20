@@ -14,6 +14,10 @@ let package = Package(
         .library(
             name: "TON",
             targets: ["TON"]
+        ),
+        .library(
+            name: "CommonServices",
+            targets: ["CommonServices"]
         )
     ],
     dependencies: [
@@ -35,6 +39,11 @@ let package = Package(
                 "Storage"
             ],
             path: "Sources/TON"
+        ),
+        .target(
+            name: "CommonServices",
+            dependencies: [],
+            path: "Sources/Common"
         )
     ]
 )

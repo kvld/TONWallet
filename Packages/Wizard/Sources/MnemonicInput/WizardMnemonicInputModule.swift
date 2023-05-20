@@ -18,12 +18,6 @@ public final class WizardMnemonicInputModule {
         state: WizardMnemonicInputState,
         viewModel: WizardViewModel
     ) {
-        self.view = AnyView(
-            WizardMnemonicInputView(
-                state: state,
-                viewModel: viewModel,
-                inputText: Array(repeating: "", count: viewModel.state.mnemonicWords.count)
-            )
-        )
+        self.view = AnyView(WizardMnemonicInputView(state: state, viewModel: viewModel))
     }
 }

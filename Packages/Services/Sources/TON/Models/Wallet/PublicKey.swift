@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct PublicKey: Codable {
+public struct PublicKey: Codable, Equatable {
     public let encryptedKey: String
 
     public var key: Data {

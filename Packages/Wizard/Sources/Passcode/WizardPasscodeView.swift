@@ -108,10 +108,8 @@ private struct PasscodeInputView: View {
 
     var body: some View {
         ZStack {
-            TextField("", text: $typedPasscode)
+            _TextField(text: $typedPasscode)
                 .opacity(0.0)
-                .focused(.constant(true))
-                .keyboardType(.numberPad)
 
             HStack(spacing: 16) {
                 ForEach(0..<length, id: \.self) { idx in
@@ -140,6 +138,54 @@ private struct PasscodeInputView: View {
             if newValue.count == length {
                 onSuccess(String(newValue.prefix(length)))
             }
+        }
+    }
+}
+
+private struct _TextField: UIViewRepresentable {
+    @Binding var text: String
+
+    final class TextField: UITextField {
+        var _text: Binding<String>
+
+        init(frame: CGRect, text: Binding<String>) {
+            self._text = text
+
+            super.init(frame: frame)
+            addTarget(self, action: #selector(onUpdate), for: .editingChanged)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        @objc
+        func onUpdate() {
+            guard let text = text else {
+                return
+            }
+
+            _text.wrappedValue = text
+        }
+    }
+
+    func makeUIView(context: Context) -> TextField {
+        let textField = TextField(frame: .zero, text: _text)
+        textField.keyboardType = .decimalPad
+
+        DispatchQueue.main.async {
+            textField.becomeFirstResponder()
+        }
+
+        return textField
+    }
+
+    func updateUIView(_ uiView: TextField, context: Context) {
+        uiView.text = _text.wrappedValue
+
+        DispatchQueue.main.async {
+            uiView.becomeFirstResponder()
         }
     }
 }

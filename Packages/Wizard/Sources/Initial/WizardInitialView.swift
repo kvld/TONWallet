@@ -26,6 +26,18 @@ struct WizardInitialView: View {
         .eraseToAnyView()
     }
 
+    private var secondaryButton: AnyView {
+        Button("Importing existing wallet") {
+            guard !isWalletLoading else {
+                return
+            }
+
+            viewModel.importMnemonic()
+        }
+        .buttonStyle(.action(background: .outline))
+        .eraseToAnyView()
+    }
+
     var body: some View {
         WizardInfoView(
             model: .init(
@@ -33,7 +45,7 @@ struct WizardInitialView: View {
                 title: "TON Wallet",
                 text: "TON Wallet allows you to make fast and secure blockchain-based payments without intermediaries.",
                 primaryButton: primaryButton,
-                secondaryButton: EmptyView().eraseToAnyView()
+                secondaryButton: secondaryButton
             )
         )
     }

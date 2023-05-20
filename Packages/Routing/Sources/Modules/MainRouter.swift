@@ -8,6 +8,7 @@ import SwiftUI
 import WizardState
 import SendState
 import TON
+import CommonServices
 
 public final class MainRouter: HostingRouter<AnyView, MainModule> {
     private weak var parentNavigationRouter: NavigationRouter?
@@ -32,9 +33,15 @@ extension MainRouter: MainModuleOutput {
             storage: .init(),
             configURL: URL(string: "https://ton.org/testnet-global.config.json")!
         )
-        let walletInfoService = WalletInfoService(storage: .init())
+        let configService = ConfigService(storage: .init())
 
-        let viewModel = WizardViewModel(tonService: tonService, walletInfoService: walletInfoService)
+        let biometricService = BiometricService()
+
+        let viewModel = WizardViewModel(
+            tonService: tonService,
+            configService: configService,
+            biometricService: biometricService
+        )
 
         let router = WizardRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
@@ -59,9 +66,9 @@ extension MainRouter: MainModuleOutput {
             storage: .init(),
             configURL: URL(string: "https://ton.org/testnet-global.config.json")!
         )
-        let walletInfoService = WalletInfoService(storage: .init())
+        let configService = ConfigService(storage: .init())
 
-        let viewModel = SendViewModel(tonService: tonService, walletInfoService: walletInfoService)
+        let viewModel = SendViewModel(tonService: tonService, configService: configService)
 
         let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
@@ -79,5 +86,10 @@ extension MainRouter: MainModuleOutput {
 
         let router = QRScannerRouter(parentNavigationRouter: parentNavigationRouter, completion: { _ in })
         parentNavigationRouter.present(router: router)
+    }
+
+    public func showSettings() {
+        let router = SettingsRouter()
+        parentNavigationRouter?.present(router: router)
     }
 }

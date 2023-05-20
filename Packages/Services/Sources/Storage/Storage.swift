@@ -52,11 +52,11 @@ public final class Storage {
         withKey key: StorageKey,
         type: SecurityType = .`unsafe`
     ) throws -> StorageItemWrapper<T?> {
-        let wrapper = StorageItemWrapper<T?>(value: nil, type: type) { [weak self] newValue in
+        let wrapper = StorageItemWrapper<T?>(value: nil, type: type) { [self] newValue in
             guard let newValue else {
                 return
             }
-            try? self?.resolveStorage(for: type).store(newValue, withKey: key.value)
+            try? self.resolveStorage(for: type).store(newValue, withKey: key.value)
         }
         wrapper.value = object
         return wrapper

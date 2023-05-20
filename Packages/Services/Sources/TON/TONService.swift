@@ -119,11 +119,59 @@ extension TONService {
             uuid: .init(),
             walletID: Int(configInfo.defaultWalletId.value),
             address: .init(address.accountAddress),
-            keys: .init(
+            credentials: .init(
                 privateKey: privateKey.data,
                 secretKey: key.secret,
                 publicKey: publicKey,
-                mnemonicWords: exportedKey.wordList
+                mnemonicWords: exportedKey.wordList,
+                passcode: "",
+                isBiometricEnabled: false
+            )
+        )
+    }
+
+    public func importWallet(mnemonicWords: [String]) async throws -> WalletInfo {
+        let exportedKey = ExportedKey(wordList: mnemonicWords)
+        let key = try await client.execute(
+            ImportKey(localPassword: .init(), mnemonicPassword: .init(), exportedKey: exportedKey)
+        )
+
+        let inputKey: InputKey = .inputKeyRegular(.init(key: key, localPassword: .init()))
+
+        let privateKey = try await client.execute(ExportUnencryptedKey(inputKey: inputKey))
+
+        let publicKey = PublicKey(encryptedKey: key.publicKey)
+
+        let wallet = try await WalletFactory.makeWallet(
+            workchain: 0,
+            walletID: Int(configInfo.defaultWalletId.value),
+            publicKey: publicKey
+        )
+
+        let initialAccountState = RawInitialAccountState(
+            code: try wallet.code.serializeAsBoC(),
+            data: try wallet.data.serializeAsBoC()
+        )
+
+        let accountAddressRequest = GetAccountAddress(
+            initialAccountState: .rawInitialAccountState(initialAccountState),
+            revision: 0,
+            workchainId: 0
+        )
+
+        let address = try await client.execute(accountAddressRequest)
+
+        return try await .init(
+            uuid: .init(),
+            walletID: Int(configInfo.defaultWalletId.value),
+            address: .init(address.accountAddress),
+            credentials: .init(
+                privateKey: privateKey.data,
+                secretKey: key.secret,
+                publicKey: publicKey,
+                mnemonicWords: exportedKey.wordList,
+                passcode: "",
+                isBiometricEnabled: false
             )
         )
     }
@@ -255,7 +303,7 @@ extension TONService {
                 type: walletInfo.type,
                 workchain: 0,
                 walletID: walletInfo.walletID,
-                publicKey: walletInfo.keys.publicKey
+                publicKey: walletInfo.credentials.publicKey
             )
 
             code = try wallet.code.serializeAsBoC(hasCRC32: true)
@@ -272,8 +320,8 @@ extension TONService {
             privateKey: .inputKeyRegular(
                 .init(
                     key: .init(
-                        publicKey: walletInfo.keys.publicKey.encryptedKey,
-                        secret: walletInfo.keys.secretKey
+                        publicKey: walletInfo.credentials.publicKey.encryptedKey,
+                        secret: walletInfo.credentials.secretKey
                     ),
                     localPassword: .init()
                 )
@@ -285,7 +333,7 @@ extension TONService {
                     messages: [
                         .init(
                             destination: .init(accountAddress: destination.value),
-                            publicKey: walletInfo.keys.publicKey.encryptedKey,
+                            publicKey: walletInfo.credentials.publicKey.encryptedKey,
                             amount: .init(amount.value),
                             data: .msgDataText(.init(text: message)),
                             sendMode: 3
@@ -345,5 +393,10 @@ extension TONService {
 
             try Task.checkCancellation()
         }
+    }
+
+    public func getMnemonicSuggestions(prefix: String) async throws -> [String] {
+        let response = try await client.execute(GetBip39Hints(prefix: prefix))
+        return response.words
     }
 }

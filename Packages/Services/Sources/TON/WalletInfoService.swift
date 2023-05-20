@@ -6,6 +6,28 @@ import Foundation
 import Storage
 import Combine
 
+public struct Config: Codable {
+    public var lastUsedWalletID: UUID?
+    public var wallets: Set<WalletInfo>
+    public var fiatCurrency: FiatCurrency
+
+    public var lastUsedWallet: WalletInfo? {
+        wallets.first(where: { $0.uuid == lastUsedWalletID })
+    }
+
+    public enum FiatCurrency: String, Codable {
+        case usd = "USD"
+        case eur = "EUR"
+        case gbp = "GBP"
+        case rub = "RUB"
+        case aed = "AED"
+    }
+
+    public static var initial: Config {
+        .init(wallets: [], fiatCurrency: .usd)
+    }
+}
+
 public enum WalletFetchState {
     case unknown
     case fetched(WalletInfo?)
@@ -29,36 +51,23 @@ public enum WalletFetchState {
     }
 }
 
-public final class WalletInfoService {
-    private let storage: Storage
+public final class ConfigService {
+    private let config: StorageItemWrapper<Config>
 
     private var _walletFetchState = CurrentValueSubject<WalletFetchState, Never>(.unknown)
 
     public init(storage: Storage) {
-        self.storage = storage
+        self.config = storage.retrieve(with: .config, defaultValue: .initial, constrainTypeWith: .safe)
 
         loadLastUsedWallet()
     }
 
     private func loadLastUsedWallet() {
-        guard let lastUsedUUID: UUID = try? storage.retrieve(with: .lastUsedWalletUUID) else {
-            _walletFetchState.send(.fetched(nil))
-            return
-        }
-
-        guard let walletInfo: WalletInfo = try? storage.retrieve(
-            with: .walletInfo(uuid: lastUsedUUID),
-            type: .safe
-        ) else {
-            _walletFetchState.send(.fetched(nil))
-            return
-        }
-
-        _walletFetchState.send(.fetched(walletInfo))
+        _walletFetchState.send(.fetched(config.value.lastUsedWallet))
     }
 }
 
-extension WalletInfoService {
+extension ConfigService {
     public var walletFetchState: AnyPublisher<WalletFetchState, Never> {
         _walletFetchState.eraseToAnyPublisher()
     }
@@ -70,15 +79,13 @@ extension WalletInfoService {
     public func updateWallet(with walletInfo: WalletInfo) throws {
         let uuid = walletInfo.uuid
 
-        try storage.store(walletInfo, withKey: .walletInfo(uuid: uuid), type: .safe)
-        try storage.store(uuid, withKey: .lastUsedWalletUUID)
+        config.value.wallets.insert(walletInfo)
+        config.value.lastUsedWalletID = uuid
 
         _walletFetchState.send(.fetched(walletInfo))
     }
 }
 
 extension StorageKey {
-    static var lastUsedWalletUUID: StorageKey { .init("lastUsedWalletUUID") }
-
-    static func walletInfo(uuid: UUID) -> StorageKey { .init("walletInfo[\(uuid.uuidString)]") }
+    static var config: StorageKey { .init("config") }
 }

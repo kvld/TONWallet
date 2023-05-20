@@ -82,13 +82,13 @@ struct MainView: View {
         case .loading:
             LoadingStateView()
                 .frame(height: containerHeight, alignment: .center)
-                .padding(.top, -56)
+                .padding(.top, -8)
 
         case let .idle(model):
             if model.transactions.isEmpty {
                 EmptyStateView(address: model.address.full)
                     .frame(height: containerHeight, alignment: .center)
-                    .padding(.top, -56)
+                    .padding(.top, -8)
             } else {
                 ForEach(model.transactions) { item in
                     switch item {
@@ -128,6 +128,8 @@ struct MainView: View {
         ) {
             MainNavigationBar {
                 viewModel.showScanner()
+            } onSettingsTap: {
+                viewModel.showSettings()
             } balanceView: {
                 navigationBarBalanceView
             }

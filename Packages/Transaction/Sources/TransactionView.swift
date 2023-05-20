@@ -6,7 +6,6 @@ import SwiftUI
 import SwiftUIHelpers
 import Components
 
-
 struct TransactionView: View {
     @ObservedObject var viewModel: TransactionViewModel
 

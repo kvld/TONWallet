@@ -5,10 +5,11 @@
 import Foundation
 import WizardBiometric
 import SwiftUI
+import WizardState
 
 final class WizardBiometricRouter: HostingRouter<AnyView, WizardBiometricModule> {
-    init(onSuccess: @escaping () -> Void, onSkip: @escaping () -> Void) {
-        let module = WizardBiometricModule(onSuccess: onSuccess, onSkip: onSkip)
+    init(viewModel: WizardViewModel) {
+        let module = WizardBiometricModule(viewModel: viewModel)
 
         super.init(view: module.view, module: module)
     }

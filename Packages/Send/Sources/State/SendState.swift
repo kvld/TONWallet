@@ -28,16 +28,16 @@ public protocol SendViewModelOutput: AnyObject {
 
 public final class SendViewModel: ObservableObject {
     private let tonService: TONService
-    private let walletInfoService: WalletInfoService
+    private let configService: ConfigService
 
     @Published public var state: SendState
 
     public weak var output: SendViewModelOutput?
 
-    public init(tonService: TONService, walletInfoService: WalletInfoService) {
+    public init(tonService: TONService, configService: ConfigService) {
         self.tonService = tonService
         self.state = .initial
-        self.walletInfoService = walletInfoService
+        self.configService = configService
     }
 }
 
@@ -45,7 +45,7 @@ extension SendViewModel {
     @MainActor
     public func submit(address: String) async {
         guard !address.isEmpty, !state.isLoading,
-              let currentAddress = walletInfoService.lastKnownWallet.walletInfo?.address else {
+              let currentAddress = configService.lastKnownWallet.walletInfo?.address else {
             return
         }
 
@@ -99,7 +99,7 @@ extension SendViewModel {
     @MainActor
     public func submit(amount: String) async {
         guard !state.hasInsufficientFunds, !state.isLoading, let value = amount.asDouble,
-              let walletInfo = walletInfoService.lastKnownWallet.walletInfo,
+              let walletInfo = configService.lastKnownWallet.walletInfo,
               let destination = state.address else {
             return
         }
@@ -125,7 +125,7 @@ extension SendViewModel {
     @MainActor
     public func confirmAndSendTransaction() async {
         guard !state.isLoading, let amount = state.amount, let destination = state.address,
-              let walletInfo = walletInfoService.lastKnownWallet.walletInfo else {
+              let walletInfo = configService.lastKnownWallet.walletInfo else {
             return
         }
 
@@ -142,7 +142,7 @@ extension SendViewModel {
 
     @MainActor
     public func showWaitingState() async {
-        guard let walletInfo = walletInfoService.lastKnownWallet.walletInfo else {
+        guard let walletInfo = configService.lastKnownWallet.walletInfo else {
             return
         }
 

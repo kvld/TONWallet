@@ -26,6 +26,7 @@
 		4662C76129F51F7200D77E64 /* Wizard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Wizard; path = Packages/Wizard; sourceTree = "<group>"; };
 		466BB6AE2A10618C003159B3 /* TONLibJSON.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TONLibJSON.xcframework; path = Packages/TONKit/Frameworks/TONLibJSON.xcframework; sourceTree = "<group>"; };
 		466BB6B22A1106FC003159B3 /* QRScanner */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = QRScanner; path = Packages/QRScanner; sourceTree = "<group>"; };
+		466BB6B32A11248B003159B3 /* Settings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Settings; path = Packages/Settings; sourceTree = "<group>"; };
 		4686AFA129FEA80100A7803D /* QRUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = QRUtils; path = Packages/QRUtils; sourceTree = "<group>"; };
 		46ACDC7429D404D70020AF32 /* AnimationView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationView; path = Packages/AnimationView; sourceTree = "<group>"; };
 		46AE1D8E29CDA617006A184E /* SwiftUIUtils */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftUIUtils; path = Packages/SwiftUIUtils; sourceTree = "<group>"; };
@@ -57,6 +58,7 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				466BB6B32A11248B003159B3 /* Settings */,
 				466BB6B22A1106FC003159B3 /* QRScanner */,
 				46F7D0A12A10353000337AEF /* Transaction */,
 				46529DBC2A102A7500E894D0 /* Sheet */,

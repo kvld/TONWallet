@@ -12,6 +12,7 @@ public protocol MainModuleOutput: AnyObject {
     func showSend()
     func showTransaction(_ transaction: TON.Transaction)
     func showScanner()
+    func showSettings()
 }
 
 public final class MainModule {
@@ -28,12 +29,12 @@ public final class MainModule {
     }
 
     public init() {
-        let walletInfoService = WalletInfoService(storage: .init())
+        let configService = ConfigService(storage: .init())
         let tonService = TONService(
             storage: .init(),
             configURL: URL(string: "https://ton.org/testnet-global.config.json")!
         )
-        let viewModel = MainViewModel(walletInfoService: walletInfoService, tonService: tonService)
+        let viewModel = MainViewModel(configService: configService, tonService: tonService)
 
         self.viewModel = viewModel
         self.view = AnyView(MainView(viewModel: viewModel))

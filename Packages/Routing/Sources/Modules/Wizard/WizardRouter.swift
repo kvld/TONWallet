@@ -114,14 +114,7 @@ final class WizardRouter: Router, WizardViewModelOutput {
     }
 
     func showBiometric() {
-        let router = WizardBiometricRouter(
-            onSuccess: { },
-            onSkip: { [weak self] in
-                self?.showFinal()
-                self?._navigationRouter.dismissTopmost()
-            }
-        )
-
+        let router = WizardBiometricRouter(viewModel: viewModel)
         router.viewController.modalPresentationStyle = .fullScreen
         _navigationRouter.present(router: router)
     }
@@ -143,6 +136,34 @@ final class WizardRouter: Router, WizardViewModelOutput {
             }
         )
         _navigationRouter.push(router: router)
+    }
+
+    func showImportWrongWordAlert() {
+        let actions: [UIAlertAction] = [
+            .init(title: "Try again", style: .cancel)
+        ]
+
+        let router = AlertRouter(
+            title: "Incorrect words",
+            message: "Some words you have entered are not correct.",
+            actions: actions
+        )
+
+        _navigationRouter.present(router: router)
+    }
+
+    func showImportSomeWordsEmptyAlert() {
+        let actions: [UIAlertAction] = [
+            .init(title: "Try again", style: .cancel)
+        ]
+
+        let router = AlertRouter(
+            title: "Incorrect words",
+            message: "You should enter all of your 24 secret words.",
+            actions: actions
+        )
+
+        _navigationRouter.present(router: router)
     }
 }
 

@@ -26,6 +26,7 @@ public final class QRScannerController: UIViewController {
 
     private func setupVideo() {
         guard let captureDevice = AVCaptureDevice.default(for: .video) else {
+            setupOverlayNoAccess()
             return
         }
 

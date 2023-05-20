@@ -89,7 +89,8 @@ let package = Package(
         .target(
             name: "WizardState",
             dependencies: [
-                .product(name: "TON", package: "Services")
+                .product(name: "TON", package: "Services"),
+                .product(name: "CommonServices", package: "Services")
             ],
             path: "Sources/State"
         ),

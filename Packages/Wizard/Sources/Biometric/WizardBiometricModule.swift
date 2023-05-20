@@ -4,19 +4,12 @@
 
 import Foundation
 import SwiftUI
+import WizardState
 
 public final class WizardBiometricModule {
-    public lazy var view: AnyView = {
-        AnyView(
-            WizardBiometricView(onSkipTap: onSkip)
-        )
-    }()
+    public let view: AnyView
 
-    private let onSkip: () -> Void
-    private let onSuccess: () -> Void
-
-    public init(onSuccess: @escaping () -> Void, onSkip: @escaping () -> Void) {
-        self.onSkip = onSkip
-        self.onSuccess = onSuccess
+    public init(viewModel: WizardViewModel) {
+        self.view = WizardBiometricView(viewModel: viewModel).eraseToAnyView()
     }
 }

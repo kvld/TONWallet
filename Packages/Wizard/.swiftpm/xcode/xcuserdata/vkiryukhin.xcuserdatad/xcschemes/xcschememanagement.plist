@@ -7,37 +7,37 @@
 		<key>WizardBiometric.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>27</integer>
+			<integer>2</integer>
 		</dict>
 		<key>WizardInfo.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>22</integer>
+			<integer>7</integer>
 		</dict>
 		<key>WizardInitial.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>25</integer>
+			<integer>6</integer>
 		</dict>
 		<key>WizardMnemonic.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>23</integer>
+			<integer>5</integer>
 		</dict>
 		<key>WizardMnemonicInput.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>21</integer>
+			<integer>3</integer>
 		</dict>
 		<key>WizardPasscode.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>26</integer>
+			<integer>4</integer>
 		</dict>
 		<key>WizardState.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>24</integer>
+			<integer>1</integer>
 		</dict>
 	</dict>
 </dict>

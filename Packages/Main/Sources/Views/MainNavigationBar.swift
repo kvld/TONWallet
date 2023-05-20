@@ -7,6 +7,7 @@ import SwiftUIHelpers
 
 struct MainNavigationBar<BalanceView: View>: View {
     let onScanTap: () -> Void
+    let onSettingsTap: () -> Void
     @ViewBuilder let balanceView: () -> BalanceView
 
     var body: some View {
@@ -25,9 +26,7 @@ struct MainNavigationBar<BalanceView: View>: View {
             Image("settings")
                 .resizable()
                 .frame(width: 28, height: 28)
-                .onTapWithFeedback {
-
-                }
+                .onTapWithFeedback(action: onSettingsTap)
         }
         .padding(.horizontal, 14)
         .foregroundColor(.white)
