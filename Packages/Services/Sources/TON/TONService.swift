@@ -117,20 +117,19 @@ extension TONService {
 
         return try await .init(
             uuid: .init(),
+            type: .default,
             walletID: Int(configInfo.defaultWalletId.value),
             address: .init(address.accountAddress),
             credentials: .init(
                 privateKey: privateKey.data,
                 secretKey: key.secret,
                 publicKey: publicKey,
-                mnemonicWords: exportedKey.wordList,
-                passcode: "",
-                isBiometricEnabled: false
+                mnemonicWords: exportedKey.wordList
             )
         )
     }
 
-    public func importWallet(mnemonicWords: [String]) async throws -> WalletInfo {
+    public func importWallet(mnemonicWords: [String], walletType: WalletType = .default) async throws -> WalletInfo {
         let exportedKey = ExportedKey(wordList: mnemonicWords)
         let key = try await client.execute(
             ImportKey(localPassword: .init(), mnemonicPassword: .init(), exportedKey: exportedKey)
@@ -143,6 +142,7 @@ extension TONService {
         let publicKey = PublicKey(encryptedKey: key.publicKey)
 
         let wallet = try await WalletFactory.makeWallet(
+            type: walletType,
             workchain: 0,
             walletID: Int(configInfo.defaultWalletId.value),
             publicKey: publicKey
@@ -163,15 +163,14 @@ extension TONService {
 
         return try await .init(
             uuid: .init(),
+            type: walletType,
             walletID: Int(configInfo.defaultWalletId.value),
             address: .init(address.accountAddress),
             credentials: .init(
                 privateKey: privateKey.data,
                 secretKey: key.secret,
                 publicKey: publicKey,
-                mnemonicWords: exportedKey.wordList,
-                passcode: "",
-                isBiometricEnabled: false
+                mnemonicWords: exportedKey.wordList
             )
         )
     }
@@ -188,7 +187,7 @@ extension TONService {
             hash: stateResponse.lastTransactionId.hash
         )
 
-        return .init(balance: .init(stateResponse.balance.value), lastTransactionID: lastTransaction)
+        return .init(balance: .init(max(0, stateResponse.balance.value)), lastTransactionID: lastTransaction)
     }
 
     public func fetchTransactions(

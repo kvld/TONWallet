@@ -10,11 +10,12 @@ import SwiftUIBackports
 import SwiftUIHelpers
 import WizardState
 
-struct WizardMnemonicView: View {
-    @ObservedObject var viewModel: WizardViewModel
+struct WizardMnemonicView<ViewModel: WizardMnemonicViewModel>: View {
+    let extendNavigationBarHeight: Bool
+    @ObservedObject var viewModel: ViewModel
 
     private var words: [String] {
-        viewModel.state.mnemonicWords
+        viewModel.mnemonicWords
     }
 
     var leftColumnWords: [(Int, String)] {
@@ -26,7 +27,11 @@ struct WizardMnemonicView: View {
     }
 
     var body: some View {
-        ScreenContainer(navigationBarVisibility: .visible, navigationBarTitle: "Your Recovery Phrase") { _ in
+        ScreenContainer(
+            navigationBarVisibility: .visible,
+            navigationBarTitle: "Your Recovery Phrase",
+            extendBarHeight: extendNavigationBarHeight
+        ) { _ in
             LazyVStack(spacing: 0) {
                 AnimationView(animationName: "recovery", repeatInfinitely: false)
                     .frame(width: 124, height: 124)
@@ -74,7 +79,7 @@ struct WizardMnemonicView: View {
                 .padding(.horizontal, 45)
 
                 Button("Done") {
-                    viewModel.proceedToSavedMnemonicTest()
+                    viewModel.proceedToNext()
                 }
                 .buttonStyle(.action())
                 .padding(.top, 52)
@@ -83,7 +88,7 @@ struct WizardMnemonicView: View {
             }
         }
         .onAppear {
-            viewModel.startTimerToSaveMnemonic()
+            viewModel.didAppear()
         }
     }
 }

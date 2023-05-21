@@ -5,6 +5,7 @@
 import Foundation
 import Combine
 import TON
+import CommonServices
 
 public struct SendState {
     public var address: Address?
@@ -24,20 +25,23 @@ public protocol SendViewModelOutput: AnyObject {
     func showConfirmInput()
     func showTransactionWaiting()
     func showTransactionCompleted()
+    func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void)
 }
 
 public final class SendViewModel: ObservableObject {
     private let tonService: TONService
     private let configService: ConfigService
+    private let biometricService: BiometricService
 
     @Published public var state: SendState
 
     public weak var output: SendViewModelOutput?
 
-    public init(tonService: TONService, configService: ConfigService) {
+    public init(tonService: TONService, configService: ConfigService, biometricService: BiometricService) {
         self.tonService = tonService
         self.state = .initial
         self.configService = configService
+        self.biometricService = biometricService
     }
 }
 
@@ -123,7 +127,46 @@ extension SendViewModel {
     }
 
     @MainActor
-    public func confirmAndSendTransaction() async {
+    public func confirmTransaction() async {
+        guard !state.isLoading else {
+            return
+        }
+
+        let credentials = configService.config.value.securityConfirmation
+
+        if biometricService.isSupportBiometric, credentials.isBiometricEnabled {
+            let result = await biometricService.evaluate()
+            if !result {
+                output?.showPasscodeConfirmation(passcode: credentials.passcode) { [weak self] in
+                    Task { await self?.confirmTransaction() }
+                }
+            } else {
+                await confirmTransaction()
+            }
+        } else {
+            output?.showPasscodeConfirmation(passcode: credentials.passcode) { [weak self] in
+                Task { await self?.confirmTransaction() }
+            }
+        }
+    }
+
+    @MainActor
+    public func showWaitingState() async {
+        guard let walletInfo = configService.lastKnownWallet.walletInfo else {
+            return
+        }
+
+        output?.showTransactionWaiting()
+
+        _ = try! await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
+
+        output?.showTransactionCompleted()
+    }
+
+    // MARK: - Private
+
+    @MainActor
+    private func sendTransaction() async {
         guard !state.isLoading, let amount = state.amount, let destination = state.address,
               let walletInfo = configService.lastKnownWallet.walletInfo else {
             return
@@ -138,19 +181,6 @@ extension SendViewModel {
         state.isLoading = false
 
         await showWaitingState()
-    }
-
-    @MainActor
-    public func showWaitingState() async {
-        guard let walletInfo = configService.lastKnownWallet.walletInfo else {
-            return
-        }
-
-        output?.showTransactionWaiting()
-
-        _ = try! await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
-
-        output?.showTransactionCompleted()
     }
 }
 

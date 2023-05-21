@@ -7,13 +7,17 @@ import BOC
 
 // https://github.com/toncenter/tonweb/blob/master/src/contract/wallet/WalletSources.md
 
-public enum WalletType: String, Codable {
+public enum WalletType: String, Codable, CaseIterable {
     case v4r2
     case v3r2
     case v3r1
 
     public static var `default`: WalletType {
         .v4r2
+    }
+
+    public static var allCases: [WalletType] {
+        [.v3r1, .v3r2, .v4r2]
     }
 }
 

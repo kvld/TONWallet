@@ -77,7 +77,7 @@ struct TransactionView: View {
                 .frame(height: 44)
                 .padding(.horizontal, 16)
 
-                Divider().background(Color.separator).padding(.leading, 16)
+                Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                 HStack {
                     Text("Transaction")
@@ -91,7 +91,7 @@ struct TransactionView: View {
                 .frame(height: 44)
                 .padding(.horizontal, 16)
 
-                Divider().background(Color.separator).padding(.leading, 16)
+                Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                 HStack {
                     Text("View in explorer")

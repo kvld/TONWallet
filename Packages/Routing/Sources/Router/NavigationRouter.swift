@@ -69,8 +69,8 @@ public final class NavigationRouter: Router {
         children = children.filter { $0.viewController !== lastRouter.viewController }
     }
 
-    public func popTopmost() {
-        navigationController.popViewController(animated: true)
+    public func popTopmost(animated: Bool = true) {
+        navigationController.popViewController(animated: animated)
     }
 }
 

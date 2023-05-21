@@ -7,10 +7,34 @@ import SwiftUI
 import SwiftUIHelpers
 import TON
 
+public protocol SettingsModuleOutput: AnyObject {
+    func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void)
+    func showMnemonicWords(words: [String])
+    func showPasscodeChange(onSuccess: @escaping (String) -> Void)
+    func showDeleteConfirmation(onSuccess: @escaping () -> Void)
+}
+
 public final class SettingsModule {
     public let view: AnyView
+    private let viewModel: SettingsViewModel
 
-    public init() {
-        self.view = SettingsView(viewModel: .init()).eraseToAnyView()
+    public var output: SettingsModuleOutput? {
+        get {
+            viewModel.output
+        }
+        set {
+            viewModel.output = newValue
+        }
+    }
+
+    public init(configService: ConfigService, tonService: TONService) {
+        let viewModel = SettingsViewModel(
+            configService: configService,
+            tonService: tonService,
+            biometricService: .init()
+        )
+
+        self.viewModel = viewModel
+        self.view = SettingsView(viewModel: viewModel).eraseToAnyView()
     }
 }

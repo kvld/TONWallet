@@ -5,21 +5,132 @@
 import Foundation
 import SwiftUI
 import TON
-import Transaction
+import Settings
+import WizardMnemonic
+import WizardPasscode
 
-final class TransactionRouter: SheetHostingRouter<AnyView, TransactionModule> {
-    init(transaction: TON.Transaction) {
-        let module = TransactionModule(transaction: transaction)
+final class SettingsRouter: HostingRouter<AnyView, SettingsModule> {
+    private weak var navigationRouter: NavigationRouter?
+    private weak var parentNavigationRouter: NavigationRouter?
+
+    init(navigationRouter: NavigationRouter, parentNavigationRouter: NavigationRouter) {
+        self.parentNavigationRouter = parentNavigationRouter
+        self.navigationRouter = navigationRouter
+
+        let module = SettingsModule(
+            configService: .init(storage: .init()),
+            tonService: .init(storage: .init(), configURL: URL(string: "https://ton.org/testnet-global.config.json")!)
+        )
         super.init(view: module.view, module: module)
 
         module.output = self
     }
 }
 
-extension TransactionRouter: TransactionModuleOutput {
-    func showTransactionInExplorer(id: String) {
-        if let url = URL(string: "https://tonscan.org/tx/\(id)") {
-           UIApplication.shared.open(url)
+extension SettingsRouter: SettingsModuleOutput {
+    func showMnemonicWords(words: [String]) {
+        let viewModel = RecoveryMnemonicViewModel(mnemonicWords: words) { [weak navigationRouter] in
+            navigationRouter?.popTopmost()
         }
+        let router = WizardMnemonicRouter(extendNavigationBarHeight: true, viewModel: viewModel)
+        navigationRouter?.push(router: router)
+    }
+
+    func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void) {
+        guard let navigationRouter else {
+            return
+        }
+
+        let router = PasscodeRouter(
+            passcode: passcode,
+            navigationRouter: navigationRouter
+        ) { [weak navigationRouter] in
+            navigationRouter?.dismissTopmost()
+            onSuccess()
+        }
+        router.viewController.modalPresentationStyle = .overFullScreen
+        navigationRouter.present(router: router)
+    }
+
+    func showPasscodeChange(onSuccess: @escaping (String) -> Void) {
+        let viewModel = PasscodeChangeViewModel { [weak navigationRouter] _viewModel in
+            let router = WizardPasscodeRouter(
+                isInConfirmationMode: true,
+                extendNavigationBarHeight: true,
+                viewModel: _viewModel
+            )
+            navigationRouter?.push(router: router)
+        } onConfirm: { [weak navigationRouter] passcode in
+            navigationRouter?.popTopmost(animated: false)
+            navigationRouter?.popTopmost(animated: true)
+
+            onSuccess(passcode)
+        }
+
+        let router = WizardPasscodeRouter(
+            isInConfirmationMode: false,
+            extendNavigationBarHeight: true,
+            viewModel: viewModel
+        )
+        navigationRouter?.push(router: router)
+    }
+
+    func showDeleteConfirmation(onSuccess: @escaping () -> Void) {
+        let actions: [UIAlertAction] = [
+            .init(title: "Cancel", style: .cancel),
+            .init(title: "Delete", style: .destructive) { _ in
+                onSuccess()
+            }
+        ]
+
+        let router = AlertRouter(
+            title: "Are you sure?",
+            message: "All of your wallet data will be lost.",
+            actions: actions
+        )
+
+        navigationRouter?.present(router: router)
+    }
+}
+
+private final class RecoveryMnemonicViewModel: WizardMnemonicViewModel {
+    let mnemonicWords: [String]
+
+    private let onDoneTap: () -> Void
+
+    init(mnemonicWords: [String], onDoneTap: @escaping () -> Void) {
+        self.mnemonicWords = mnemonicWords
+        self.onDoneTap = onDoneTap
+    }
+
+    func proceedToNext() {
+        onDoneTap()
+    }
+
+    func didAppear() { }
+}
+
+private final class PasscodeChangeViewModel: WizardPasscodeViewModel {
+    @Published var passcode: String?
+
+    private let onSetup: (PasscodeChangeViewModel) -> Void
+    private let onConfirm: (String) -> Void
+
+    init(onSetup: @escaping (PasscodeChangeViewModel) -> Void, onConfirm: @escaping (String) -> Void) {
+        self.onSetup = onSetup
+        self.onConfirm = onConfirm
+    }
+
+    func confirmPasscode(_ value: String) -> Bool {
+        if value == passcode {
+            onConfirm(passcode ?? "")
+            return true
+        }
+        return false
+    }
+
+    func setUpPasscode(_ value: String) {
+        passcode = value
+        onSetup(self)
     }
 }

@@ -8,8 +8,8 @@ import WizardMnemonic
 import WizardState
 
 final class WizardMnemonicRouter: HostingRouter<AnyView, WizardMnemonicModule> {
-    init(viewModel: WizardViewModel) {
-        let module = WizardMnemonicModule(viewModel: viewModel)
+    init<ViewModel: WizardMnemonicViewModel>(extendNavigationBarHeight: Bool = false, viewModel: ViewModel) {
+        let module = WizardMnemonicModule(extendNavigationBarHeight: extendNavigationBarHeight, viewModel: viewModel)
         super.init(view: module.view, module: module)
     }
 }

@@ -10,9 +10,10 @@ import SwiftUIBackports
 import SwiftUIHelpers
 import WizardState
 
-struct WizardPasscodeView: View {
+struct WizardPasscodeView<ViewModel: WizardPasscodeViewModel>: View {
     let isInConfirmationMode: Bool
-    @ObservedObject var viewModel: WizardViewModel
+    let extendNavigationBarHeight: Bool
+    @ObservedObject var viewModel: ViewModel
 
     @State private var _passcodeLength = 4
     @State private var hapticFeedback = HapticFeedback()
@@ -21,7 +22,7 @@ struct WizardPasscodeView: View {
     @State private var shakePasscodeInput: Bool = false
 
     var passcodeLength: Int {
-        viewModel.state.passcode?.count ?? _passcodeLength
+        viewModel.passcode?.count ?? _passcodeLength
     }
 
     var title: String {
@@ -29,7 +30,11 @@ struct WizardPasscodeView: View {
     }
 
     var body: some View {
-        ScreenContainer(navigationBarVisibility: .visible, navigationBarTitle: title) { proxy in
+        ScreenContainer(
+            navigationBarVisibility: .visible,
+            navigationBarTitle: title,
+            extendBarHeight: extendNavigationBarHeight
+        ) { proxy in
             VStack(spacing: 0) {
                 AnimationView(animationName: "password") // TODO: 0.5 duration
                     .frame(width: 124, height: 124)

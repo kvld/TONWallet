@@ -9,6 +9,8 @@ import Components
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
 
+    @State private var creatingWalletID: String?
+
     var body: some View {
         ScreenContainer(
             navigationBarTitle: "Wallet Settings",
@@ -25,22 +27,46 @@ struct SettingsView: View {
                         HStack {
                             Text("Active address")
                             Spacer()
-                            HStack(alignment: .center, spacing: 6) {
-                                Text("v4R2")
-                                    .fontConfiguration(.body.regular)
 
-                                Image("menu_arrow").resizable()
-                                    .frame(width: 12, height: 12)
-                                    .padding(.top, 2)
+                            Menu {
+                                ForEach(viewModel.wallets) { wallet in
+                                    Button {
+                                        creatingWalletID = wallet.id
+                                        Task {
+                                            await viewModel.switchWallet(to: wallet.id)
+                                            creatingWalletID = nil
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(wallet.title)
+                                            Spacer()
+
+                                            if wallet.isActive {
+                                                Image(systemName: "checkmark")
+                                            } else if wallet.id == creatingWalletID {
+                                                ProgressView()
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack(alignment: .center, spacing: 6) {
+                                    Text(viewModel.wallets.first(where: { $0.isActive })?.title ?? "")
+                                        .fontConfiguration(.body.regular)
+
+                                    Image("menu_arrow").resizable()
+                                        .frame(width: 12, height: 12)
+                                        .padding(.top, 2)
+                                }
+                                .foregroundColor(.accent.app)
                             }
-                            .foregroundColor(.accent.app)
                         }
                         .fontConfiguration(.body.regular)
                         .foregroundColor(.text.primary)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
 
-                        Divider().background(Color.separator).padding(.leading, 16)
+                        Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                         HStack {
                             Text("Primary currency")
@@ -80,8 +106,13 @@ struct SettingsView: View {
                         .foregroundColor(.text.primary)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
+                        .onTapWithHighlight {
+                            Task {
+                                await viewModel.showMnemonicWords()
+                            }
+                        }
 
-                        Divider().background(Color.separator).padding(.leading, 16)
+                        Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                         HStack {
                             Text("Change passcode")
@@ -96,17 +127,25 @@ struct SettingsView: View {
                         .foregroundColor(.text.primary)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
-
-                        Divider().background(Color.separator).padding(.leading, 16)
-
-                        HStack {
-                            Text("Face ID")
-                            Spacer()
+                        .onTapWithHighlight {
+                            Task {
+                                await viewModel.changePasscode()
+                            }
                         }
-                        .fontConfiguration(.body.regular)
-                        .foregroundColor(.text.primary)
-                        .padding(.horizontal, 16)
-                        .frame(height: 44)
+
+                        if let biometricType = viewModel.biometricType {
+                            Divider().foregroundColor(Color.separator).padding(.leading, 16)
+
+                            HStack {
+                                Text(biometricType == .faceID ? "Face ID" : "Touch ID")
+                                Spacer()
+                                Toggle("", isOn: $viewModel.isBiometricEnabled)
+                            }
+                            .fontConfiguration(.body.regular)
+                            .foregroundColor(.text.primary)
+                            .padding(.horizontal, 16)
+                            .frame(height: 44)
+                        }
                     }
                     .background(Color.background.content)
                     .cornerRadius(10)
@@ -123,6 +162,11 @@ struct SettingsView: View {
                         .foregroundColor(.system.red)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
+                        .onTapWithHighlight {
+                            Task {
+                                viewModel.deleteAccount()
+                            }
+                        }
                     }
                     .background(Color.background.content)
                     .cornerRadius(10)

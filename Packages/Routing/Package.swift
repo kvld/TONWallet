@@ -20,7 +20,8 @@ let package = Package(
         .package(path: "../Sheet"),
         .package(path: "../Transaction"),
         .package(path: "../QRScanner"),
-        .package(path: "../Settings")
+        .package(path: "../Settings"),
+        .package(path: "../Passcode")
     ],
     targets: [
         .target(
@@ -43,7 +44,8 @@ let package = Package(
                 .product(name: "Sheet", package: "Sheet"),
                 .product(name: "Transaction", package: "Transaction"),
                 .product(name: "QRScanner", package: "QRScanner"),
-                .product(name: "Settings", package: "Settings")
+                .product(name: "Settings", package: "Settings"),
+                .product(name: "Passcode", package: "Passcode")
             ],
             path: "Sources/"
         )

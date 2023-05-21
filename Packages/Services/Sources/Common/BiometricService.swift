@@ -26,7 +26,7 @@ public final class BiometricService {
         self.context = LAContext()
     }
 
-    public func evaluate(withLocalizedReason reason: String) async -> Bool {
+    public func evaluate(withLocalizedReason reason: String = "Need to confirm operation") async -> Bool {
         guard canEvaluate else { return false }
 
         let result = try? await context

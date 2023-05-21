@@ -4,26 +4,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "Settings",
+    name: "Passcode",
     platforms: [.iOS(.v14)],
     products: [
         .library(
-            name: "Settings",
-            targets: ["Settings"]
+            name: "Passcode",
+            targets: ["Passcode"]
         ),
     ],
     dependencies: [
         .package(path: "../Components"),
-        .package(path: "../SwiftUIUtils"),
-        .package(path: "../Services"),
+        .package(path: "../Services")
     ],
     targets: [
         .target(
-            name: "Settings",
+            name: "Passcode",
             dependencies: [
-                .product(name: "SwiftUIHelpers", package: "SwiftUIUtils"),
                 .product(name: "Components", package: "Components"),
-                .product(name: "TON", package: "Services"),
                 .product(name: "CommonServices", package: "Services")
             ],
             path: "Sources/"

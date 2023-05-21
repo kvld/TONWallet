@@ -4,8 +4,6 @@
 
 import UIKit
 
-
-
 public final class HapticFeedback {
     public enum Effect {
         case selection

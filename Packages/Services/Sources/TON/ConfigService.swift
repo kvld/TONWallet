@@ -10,6 +10,7 @@ public struct Config: Codable {
     public var lastUsedWalletID: UUID?
     public var wallets: Set<WalletInfo>
     public var fiatCurrency: FiatCurrency
+    internal(set) public var securityConfirmation: SecurityConfirmation
 
     public var lastUsedWallet: WalletInfo? {
         wallets.first(where: { $0.uuid == lastUsedWalletID })
@@ -23,8 +24,13 @@ public struct Config: Codable {
         case aed = "AED"
     }
 
+    public struct SecurityConfirmation: Codable {
+        internal(set) public var passcode: String
+        internal(set) public var isBiometricEnabled: Bool
+    }
+
     public static var initial: Config {
-        .init(wallets: [], fiatCurrency: .usd)
+        .init(wallets: [], fiatCurrency: .usd, securityConfirmation: .init(passcode: "", isBiometricEnabled: false))
     }
 }
 
@@ -52,7 +58,7 @@ public enum WalletFetchState {
 }
 
 public final class ConfigService {
-    private let config: StorageItemWrapper<Config>
+    public let config: StorageItemWrapper<Config>
 
     private var _walletFetchState = CurrentValueSubject<WalletFetchState, Never>(.unknown)
 
@@ -76,13 +82,31 @@ extension ConfigService {
         _walletFetchState.value
     }
 
-    public func updateWallet(with walletInfo: WalletInfo) throws {
+    public func getWallet(with type: WalletType) -> WalletInfo? {
+        config.value.wallets.first(where: { $0.type == type })
+    }
+
+    public func updateWallet(with walletInfo: WalletInfo) {
         let uuid = walletInfo.uuid
 
         config.value.wallets.insert(walletInfo)
         config.value.lastUsedWalletID = uuid
 
         _walletFetchState.send(.fetched(walletInfo))
+    }
+
+    public func updateSecurityInformation(passcode: String? = nil, isBiometricEnabled: Bool? = nil) {
+        if let passcode {
+            config.value.securityConfirmation.passcode = passcode
+        }
+
+        if let isBiometricEnabled {
+            config.value.securityConfirmation.isBiometricEnabled = isBiometricEnabled
+        }
+    }
+
+    public func removeAllData() {
+        config.value = .initial
     }
 }
 

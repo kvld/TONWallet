@@ -8,8 +8,16 @@ import WizardState
 import SwiftUI
 
 final class WizardPasscodeRouter: HostingRouter<AnyView, WizardPasscodeModule> {
-    init(isInConfirmationMode: Bool, viewModel: WizardViewModel) {
-        let module = WizardPasscodeModule(isInConfirmationMode: isInConfirmationMode, viewModel: viewModel)
+    init<ViewModel: WizardPasscodeViewModel>(
+        isInConfirmationMode: Bool,
+        extendNavigationBarHeight: Bool = false,
+        viewModel: ViewModel
+    ) {
+        let module = WizardPasscodeModule(
+            isInConfirmationMode: isInConfirmationMode,
+            extendNavigationBarHeight: extendNavigationBarHeight,
+            viewModel: viewModel
+        )
         super.init(view: module.view, module: module)
     }
 }

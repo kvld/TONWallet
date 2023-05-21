@@ -111,6 +111,8 @@ public final class QRScannerController: UIViewController {
         let overlayView = _UIHostingView(
             rootView: OverlayNoAccessView { [weak self] in
                 self?.onSettingsOpenTap?()
+            } onCloseTap: { [weak self] in
+                self?.onCloseTap?()
             }
         )
 
@@ -160,6 +162,7 @@ extension QRScannerController: AVCaptureMetadataOutputObjectsDelegate {
 
 private struct OverlayNoAccessView: View {
     let onSettingsOpenTap: () -> Void
+    let onCloseTap: () -> Void
 
     var body: some View {
         VStack {
@@ -186,6 +189,21 @@ private struct OverlayNoAccessView: View {
             .padding(.horizontal, 48)
 
             Spacer()
+        }
+        .overlay {
+            VStack {
+                HStack {
+                    Text("Cancel")
+                        .foregroundColor(.white)
+                        .fontConfiguration(.body.regular)
+                        .onTapWithFeedback(action: onCloseTap)
+                        .padding(.leading, 16)
+                        .frame(height: 56, alignment: .center)
+
+                    Spacer()
+                }
+                Spacer()
+            }
         }
     }
 }

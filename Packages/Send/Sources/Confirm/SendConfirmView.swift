@@ -32,7 +32,7 @@ struct SendConfirmView: View {
                         .padding(.horizontal, 16)
                         .frame(height: 44)
 
-                        Divider().background(Color.separator).padding(.leading, 16)
+                        Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                         HStack {
                             Text("Amount")
@@ -47,7 +47,7 @@ struct SendConfirmView: View {
                         .padding(.horizontal, 16)
                         .frame(height: 44)
 
-                        Divider().background(Color.separator).padding(.leading, 16)
+                        Divider().foregroundColor(Color.separator).padding(.leading, 16)
 
                         if let fee = viewModel.state.fee?.formatted.formatted {
                             HStack {
@@ -76,7 +76,7 @@ struct SendConfirmView: View {
 
                     Button("Confirm and send") {
                         Task {
-                            await viewModel.confirmAndSendTransaction()
+                            await viewModel.confirmTransaction()
                         }
                     }
                     .buttonStyle(.action())

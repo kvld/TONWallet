@@ -100,7 +100,7 @@ struct MainView: View {
                             .onTapWithHighlight {
                                 viewModel.showTransactionDetail(id: item.id)
                             }
-                        Divider().background(Color.separator).padding(.leading, 16)
+                        Divider().foregroundColor(Color.separator).padding(.leading, 16)
                     }
                 }
 

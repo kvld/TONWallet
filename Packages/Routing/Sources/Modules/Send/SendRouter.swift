@@ -53,4 +53,20 @@ final class SendRouter: Router, SendViewModelOutput {
         let sendConfirmRouter = SendCompletionRouter(stage: .completed, viewModel: viewModel)
         _navigationRouter.push(router: sendConfirmRouter)
     }
+
+    func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void) {
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let router = PasscodeRouter(
+            passcode: passcode,
+            navigationRouter: parentNavigationRouter
+        ) { [weak parentNavigationRouter] in
+            parentNavigationRouter?.dismissTopmost()
+            onSuccess()
+        }
+        router.viewController.modalPresentationStyle = .overFullScreen
+        parentNavigationRouter.present(router: router, overModal: true)
+    }
 }

@@ -13,7 +13,7 @@ public struct WalletInfo: Codable, Hashable {
 
     public init(
         uuid: UUID,
-        type: WalletType = .default,
+        type: WalletType,
         walletID: Int,
         address: Address,
         credentials: Credentials
@@ -30,27 +30,9 @@ public struct WalletInfo: Codable, Hashable {
         public let secretKey: Data
         public let publicKey: PublicKey
         public let mnemonicWords: [String]
-        public let passcode: String
-        public let isBiometricEnabled: Bool
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(uuid)
-    }
-
-    public func copyWithLocalAuthenticationOptions(passcode: String, isBiometricEnabled: Bool) -> WalletInfo {
-        .init(
-            uuid: uuid,
-            walletID: walletID,
-            address: address,
-            credentials: .init(
-                privateKey: credentials.privateKey,
-                secretKey: credentials.secretKey,
-                publicKey: credentials.publicKey,
-                mnemonicWords: credentials.mnemonicWords,
-                passcode: passcode,
-                isBiometricEnabled: isBiometricEnabled
-            )
-        )
     }
 }

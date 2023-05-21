@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import Components
 
 private struct HighlightModifier: ViewModifier {
     let action: () -> Void
@@ -24,7 +23,7 @@ private struct HighlightModifier: ViewModifier {
 }
 
 extension View {
-    func onTapWithHighlight(_ action: @escaping () -> Void) -> some View {
+    public func onTapWithHighlight(_ action: @escaping () -> Void) -> some View {
         modifier(HighlightModifier(action: action))
     }
 }

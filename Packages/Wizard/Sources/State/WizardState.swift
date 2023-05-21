@@ -230,12 +230,9 @@ extension WizardViewModel {
             return
         }
 
-        let resultWalletInfo = walletInfo.copyWithLocalAuthenticationOptions(
-            passcode: passcode,
-            isBiometricEnabled: state.isBiometricEnabled
-        )
-
-        try configService.updateWallet(with: resultWalletInfo)
+        configService.updateSecurityInformation(passcode: passcode, isBiometricEnabled: state.isBiometricEnabled)
+        configService.updateWallet(with: walletInfo)
+        
         output?.showFinal()
     }
 }

@@ -68,7 +68,11 @@ extension MainRouter: MainModuleOutput {
         )
         let configService = ConfigService(storage: .init())
 
-        let viewModel = SendViewModel(tonService: tonService, configService: configService)
+        let viewModel = SendViewModel(
+            tonService: tonService,
+            configService: configService,
+            biometricService: .init()
+        )
 
         let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
@@ -89,7 +93,17 @@ extension MainRouter: MainModuleOutput {
     }
 
     public func showSettings() {
-        let router = SettingsRouter()
-        parentNavigationRouter?.present(router: router)
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let navigationRouter = NavigationRouter { controller in
+            controller.navigationBar.isHidden = true
+        }
+
+        let router = SettingsRouter(navigationRouter: navigationRouter, parentNavigationRouter: parentNavigationRouter)
+
+        navigationRouter.embed(router: router)
+        parentNavigationRouter.present(router: navigationRouter)
     }
 }

@@ -18,6 +18,7 @@
 /* Begin PBXFileReference section */
 		4610CCED29CDB976002F3EF0 /* Routing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Routing; path = Packages/Routing; sourceTree = "<group>"; };
 		4617F60D29E2B812000A6B7B /* TONKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TONKit; path = Packages/TONKit; sourceTree = "<group>"; };
+		462D2BA32A19578500BAE2C4 /* Passcode */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Passcode; path = Packages/Passcode; sourceTree = "<group>"; };
 		46329A4D29D884CA009B7203 /* RLottie.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = RLottie.xcframework; path = Packages/AnimationView/Frameworks/RLottie.xcframework; sourceTree = "<group>"; };
 		4643EDF529FEA1DD00EB828C /* Receive */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Receive; path = Packages/Receive; sourceTree = "<group>"; };
 		46529DBC2A102A7500E894D0 /* Sheet */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Sheet; path = Packages/Sheet; sourceTree = "<group>"; };
@@ -58,6 +59,7 @@
 		46C99D6A29CD985E001F0516 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				462D2BA32A19578500BAE2C4 /* Passcode */,
 				466BB6B32A11248B003159B3 /* Settings */,
 				466BB6B22A1106FC003159B3 /* QRScanner */,
 				46F7D0A12A10353000337AEF /* Transaction */,
