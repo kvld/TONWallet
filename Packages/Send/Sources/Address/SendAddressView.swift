@@ -56,7 +56,7 @@ struct SendAddressView: View {
                                 .padding(.bottom, 1)
                         }
                         .onTapWithFeedback {
-
+                            viewModel.scanForTransferLink()
                         }
 
                         Spacer()

@@ -108,6 +108,7 @@ struct TransactionView: View {
             }
 
             Button("Send TON to this address") {
+                viewModel.sendToAddress()
             }
             .buttonStyle(.action())
             .padding(.horizontal, 16)

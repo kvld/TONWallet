@@ -37,6 +37,10 @@ final class ServiceLocator {
         register {
             BiometricService()
         }
+
+        register {
+            DeeplinkService()
+        }
     }
 }
 

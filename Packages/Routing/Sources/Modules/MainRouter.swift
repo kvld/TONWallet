@@ -56,19 +56,17 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let viewModel = SendViewModel(
-            tonService: resolve(),
-            configService: resolve(),
-            biometricService: resolve()
-        )
-
-        let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
+        let router = SendRouter(parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
 
     public func showTransaction(_ transaction: TON.Transaction) {
-        let router = TransactionRouter(transaction: transaction)
-        parentNavigationRouter?.present(router: router)
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let router = TransactionRouter(transaction: transaction, parentNavigationRouter: parentNavigationRouter)
+        parentNavigationRouter.present(router: router)
     }
 
     public func showScanner() {

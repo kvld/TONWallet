@@ -9,6 +9,7 @@ import TON
 
 public protocol TransactionModuleOutput: AnyObject {
     func showTransactionInExplorer(id: String)
+    func sendToAddress(address: Address, amount: Nanogram?)
 }
 
 public final class TransactionModule {

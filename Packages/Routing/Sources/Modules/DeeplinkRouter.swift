@@ -16,42 +16,29 @@ public final class DeeplinkRouter {
 
     @MainActor
     public func handleDeeplink(for url: URL) {
-        guard url.scheme == "ton" else {
-            return
-        }
+        let service: DeeplinkService = resolve()
 
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        switch service.handleDeeplink(for: url) {
+        case .none:
             return
-        }
-
-        switch components.host {
-        case "transfer":
-            handleTransfer(components: components)
-        default:
-            break
+        case let .transfer(address, amount, comment):
+            handleTransfer(address: address, amount: amount, comment: comment)
         }
     }
 
     @MainActor
-    private func handleTransfer(components: URLComponents) {
+    private func handleTransfer(address: String?, amount: Int64?, comment: String?) {
         guard let presentingRouter else {
             return
         }
 
         let predefinedParameters = PredefinedStateParameters(
-            address: components.path.first == "/" ? String(components.path.dropFirst()) : components.path,
-            amount: components.queryItems?.first(where: { $0.name == "amount" })?.value.flatMap { Int64($0) },
-            comment: components.queryItems?.first(where: { $0.name == "text" })?.value?.removingPercentEncoding
+            address: address,
+            amount: amount,
+            comment: comment
         )
 
-        let viewModel = SendViewModel(
-            predefinedParameters: predefinedParameters,
-            tonService: resolve(),
-            configService: resolve(),
-            biometricService: resolve()
-        )
-
-        let router = SendRouter(viewModel: viewModel, parentNavigationRouter: presentingRouter)
+        let router = SendRouter(predefinedParameters: predefinedParameters, parentNavigationRouter: presentingRouter)
         presentingRouter.present(router: router, overModal: true)
     }
 }

@@ -33,6 +33,7 @@ public protocol SendViewModelOutput: AnyObject {
     func showTransactionWaiting()
     func showTransactionCompleted()
     func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void)
+    func showScanner(onSuccess: @escaping (String) -> Void)
 }
 
 public struct PredefinedStateParameters {
@@ -55,6 +56,7 @@ public final class SendViewModel: ObservableObject {
     private let tonService: TONService
     private let configService: ConfigService
     private let biometricService: BiometricService
+    private let deeplinkService: DeeplinkService
 
     @Published public var state: SendState
 
@@ -64,12 +66,14 @@ public final class SendViewModel: ObservableObject {
         predefinedParameters: PredefinedStateParameters = .init(),
         tonService: TONService,
         configService: ConfigService,
-        biometricService: BiometricService
+        biometricService: BiometricService,
+        deeplinkService: DeeplinkService
     ) {
         self.tonService = tonService
         self.state = .makeInitial(with: predefinedParameters)
         self.configService = configService
         self.biometricService = biometricService
+        self.deeplinkService = deeplinkService
     }
 }
 
@@ -191,6 +195,19 @@ extension SendViewModel {
         _ = try! await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
 
         output?.showTransactionCompleted()
+    }
+
+    @MainActor
+    public func scanForTransferLink() {
+        output?.showScanner { [weak self] result in
+            guard let self,
+                let url = URL(string: result),
+                case let .transfer(address, amount, comment) = self.deeplinkService.handleDeeplink(for: url) else {
+                return
+            }
+
+            self.state = .makeInitial(with: .init(address: address, amount: amount, comment: comment))
+        }
     }
 
     // MARK: - Private

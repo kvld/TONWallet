@@ -6,6 +6,7 @@ import UIKit
 import SendState
 import SendAddress
 import SendConfirm
+import CommonServices
 
 @MainActor
 final class SendRouter: Router, SendViewModelOutput {
@@ -18,7 +19,15 @@ final class SendRouter: Router, SendViewModelOutput {
         _navigationRouter.viewController
     }
 
-    init(viewModel: SendViewModel, parentNavigationRouter: NavigationRouter) {
+    init(predefinedParameters: PredefinedStateParameters = .init(), parentNavigationRouter: NavigationRouter) {
+        let viewModel = SendViewModel(
+            predefinedParameters: predefinedParameters,
+            tonService: resolve(),
+            configService: resolve(),
+            biometricService: resolve(),
+            deeplinkService: resolve()
+        )
+
         let navigationRouter = NavigationRouter { controller in
             controller.navigationBar.isHidden = true
         }
@@ -68,5 +77,13 @@ final class SendRouter: Router, SendViewModelOutput {
         }
         router.viewController.modalPresentationStyle = .overFullScreen
         parentNavigationRouter.present(router: router, overModal: true)
+    }
+
+    func showScanner(onSuccess: @escaping (String) -> Void) {
+        let router = QRScannerRouter(parentNavigationRouter: _navigationRouter) { result in
+            onSuccess(result)
+        }
+
+        _navigationRouter.present(router: router, overModal: true)
     }
 }
