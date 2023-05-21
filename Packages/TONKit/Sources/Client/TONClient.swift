@@ -76,15 +76,19 @@ extension TONClient {
     public func execute<Function: TLFunction>(
         _ function: Function
     ) async throws -> Function.ReturnType {
-        for _ in 0..<5 {
+        var delay: TimeInterval = 1
+
+        for _ in 0..<7 {
             let uuid = UUID()
 
             do {
                 let result: Function.ReturnType = try await self.execute(function, uuid: uuid)
                 return result
             } catch {
-                if let error = error as? TONSchema.Error, error.code >= 500 {
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                if let error = error as? TONSchema.Error, error.code >= 500, error.message.starts(with: "LITE_SERVER_") {
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+
+                    delay *= 2
                 } else {
                     throw error
                 }

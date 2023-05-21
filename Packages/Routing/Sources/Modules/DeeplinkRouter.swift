@@ -40,14 +40,15 @@ public final class DeeplinkRouter {
 
         let predefinedParameters = PredefinedStateParameters(
             address: components.path.first == "/" ? String(components.path.dropFirst()) : components.path,
-            amount: components.queryItems?.first(where: { $0.name == "amount" })?.value.flatMap { Int64($0) }
+            amount: components.queryItems?.first(where: { $0.name == "amount" })?.value.flatMap { Int64($0) },
+            comment: components.queryItems?.first(where: { $0.name == "text" })?.value?.removingPercentEncoding
         )
 
         let viewModel = SendViewModel(
             predefinedParameters: predefinedParameters,
             tonService: resolve(),
             configService: resolve(),
-            biometricService: .init()
+            biometricService: resolve()
         )
 
         let router = SendRouter(viewModel: viewModel, parentNavigationRouter: presentingRouter)

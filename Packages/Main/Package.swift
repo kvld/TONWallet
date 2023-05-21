@@ -15,7 +15,8 @@ let package = Package(
     dependencies: [
         .package(path: "../SwiftUIUtils"),
         .package(path: "../Services"),
-        .package(path: "../AnimationView")
+        .package(path: "../AnimationView"),
+        .package(path: "../Components")
     ],
     targets: [
         .target(
@@ -25,7 +26,8 @@ let package = Package(
                 .product(name: "SwiftUIBackports", package: "SwiftUIUtils"),
                 .product(name: "SwiftUIHelpers", package: "SwiftUIUtils"),
                 .product(name: "TON", package: "Services"),
-                .product(name: "CommonServices", package: "Services")
+                .product(name: "CommonServices", package: "Services"),
+                .product(name: "Components", package: "Components")
             ],
             path: "Sources/"
         )

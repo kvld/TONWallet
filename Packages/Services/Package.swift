@@ -42,7 +42,9 @@ let package = Package(
         ),
         .target(
             name: "CommonServices",
-            dependencies: [],
+            dependencies: [
+                "TON"
+            ],
             path: "Sources/Common"
         )
     ]

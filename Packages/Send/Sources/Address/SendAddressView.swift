@@ -176,6 +176,9 @@ struct _TextEditor: UIViewRepresentable {
         textView.isUserInteractionEnabled = true
         textView.backgroundColor = .clear
 
+        textView.autocorrectionType = .no
+        textView.autocapitalizationType = .none
+
         textView.textContainerInset = .zero
         textView.font = .systemFont(ofSize: FontConfiguration.body.regular.pointSize)
 

@@ -15,11 +15,13 @@ public struct SendState {
     public var amount: Nanogram?
     public var hasInsufficientFunds = false
     public var fee: Nanogram?
+    public var comment: String?
 
     static func makeInitial(with predefinedParams: PredefinedStateParameters) -> SendState {
         .init(
             address: predefinedParams.address.flatMap { .init($0) },
-            amount: predefinedParams.amount.flatMap { .init(max(0, $0)) }
+            amount: predefinedParams.amount.flatMap { .init(max(0, $0)) },
+            comment: predefinedParams.comment
         )
     }
 }
@@ -36,13 +38,16 @@ public protocol SendViewModelOutput: AnyObject {
 public struct PredefinedStateParameters {
     public let address: String?
     public let amount: Int64?
+    public let comment: String?
 
     public init(
         address: String? = nil,
-        amount: Int64? = nil
+        amount: Int64? = nil,
+        comment: String? = nil
     ) {
         self.address = address
         self.amount = amount
+        self.comment = comment
     }
 }
 
@@ -150,10 +155,12 @@ extension SendViewModel {
     }
 
     @MainActor
-    public func confirmTransaction() async {
+    public func confirmTransaction(comment: String) async {
         guard !state.isLoading else {
             return
         }
+
+        state.comment = comment.isEmpty ? nil : comment
 
         let credentials = configService.config.value.securityConfirmation
 
@@ -161,14 +168,14 @@ extension SendViewModel {
             let result = await biometricService.evaluate()
             if !result {
                 output?.showPasscodeConfirmation(passcode: credentials.passcode) { [weak self] in
-                    Task { await self?.confirmTransaction() }
+                    Task { await self?.sendTransaction() }
                 }
             } else {
-                await confirmTransaction()
+                await sendTransaction()
             }
         } else {
             output?.showPasscodeConfirmation(passcode: credentials.passcode) { [weak self] in
-                Task { await self?.confirmTransaction() }
+                Task { await self?.sendTransaction() }
             }
         }
     }
@@ -197,7 +204,12 @@ extension SendViewModel {
 
         state.isLoading = true
 
-        let queryID = try! await tonService.initQuery(walletInfo: walletInfo, destination: destination, amount: amount)
+        let queryID = try! await tonService.initQuery(
+            walletInfo: walletInfo,
+            destination: destination,
+            amount: amount,
+            message: state.comment
+        )
 
         try! await tonService.sendQuery(with: queryID)
 
