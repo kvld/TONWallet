@@ -18,6 +18,7 @@ struct WizardPasscodeView<ViewModel: WizardPasscodeViewModel>: View {
     @State private var _passcodeLength = 4
     @State private var hapticFeedback = HapticFeedback()
     @State private var attemptsCount = 0
+    @State private var isKeyboardActive = false
 
     @State private var shakePasscodeInput: Bool = false
 
@@ -36,7 +37,7 @@ struct WizardPasscodeView<ViewModel: WizardPasscodeViewModel>: View {
             extendBarHeight: extendNavigationBarHeight
         ) { proxy in
             VStack(spacing: 0) {
-                AnimationView(animationName: "password") // TODO: 0.5 duration
+                AnimationView(animationName: "password", repeatInfinitely: false, finalProgress: 0.5)
                     .frame(width: 124, height: 124)
                     .padding(.top, 46)
                     .padding(.bottom, 20)
@@ -54,7 +55,10 @@ struct WizardPasscodeView<ViewModel: WizardPasscodeViewModel>: View {
                 }
                 .padding(.horizontal, 32)
 
-                PasscodeInputView(length: passcodeLength, attemptsCount: attemptsCount) { passcode in
+                PasscodeInputView(
+                    length: passcodeLength,
+                    attemptsCount: attemptsCount
+                ) { passcode in
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                         if isInConfirmationMode {
                             let isOk = viewModel.confirmPasscode(passcode)
@@ -114,7 +118,7 @@ private struct PasscodeInputView: View {
     var body: some View {
         ZStack {
             _TextField(text: $typedPasscode)
-                .opacity(0.0)
+                .opacity(0.001)
 
             HStack(spacing: 16) {
                 ForEach(0..<length, id: \.self) { idx in
@@ -179,8 +183,10 @@ private struct _TextField: UIViewRepresentable {
         let textField = TextField(frame: .zero, text: _text)
         textField.keyboardType = .decimalPad
 
-        DispatchQueue.main.async {
-            textField.becomeFirstResponder()
+        UIView.performWithoutAnimation {
+            DispatchQueue.main.async {
+                textField.becomeFirstResponder()
+            }
         }
 
         return textField
@@ -189,8 +195,10 @@ private struct _TextField: UIViewRepresentable {
     func updateUIView(_ uiView: TextField, context: Context) {
         uiView.text = _text.wrappedValue
 
-        DispatchQueue.main.async {
-            uiView.becomeFirstResponder()
+        UIView.performWithoutAnimation {
+            DispatchQueue.main.async {
+                uiView.becomeFirstResponder()
+            }
         }
     }
 }

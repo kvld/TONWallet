@@ -60,7 +60,9 @@ struct WizardMnemonicInputView: View {
                         Text("I don’t have those")
                             .fontConfiguration(.body.regular)
                             .foregroundColor(.accent.app)
-                            .onTapWithFeedback(action: { })
+                            .onTapWithFeedback {
+                                viewModel.showForgotMnemonicWords()
+                            }
                     }
                 }
                 .padding(.horizontal, 32)

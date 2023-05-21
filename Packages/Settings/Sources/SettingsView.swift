@@ -8,6 +8,7 @@ import Components
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
+    let onClose: () -> Void
 
     @State private var creatingWalletID: String?
 
@@ -16,6 +17,7 @@ struct SettingsView: View {
             navigationBarTitle: "Wallet Settings",
             navigationBarTitleAlwaysVisible: true,
             navigationBarLeftButton: .cancel,
+            navigationBarOnLeftButtonTap: onClose,
             extendBarHeight: true,
             backgroundColor: .background.grouped
         ) { proxy in
@@ -53,6 +55,7 @@ struct SettingsView: View {
                                 HStack(alignment: .center, spacing: 6) {
                                     Text(viewModel.wallets.first(where: { $0.isActive })?.title ?? "")
                                         .fontConfiguration(.body.regular)
+                                        .frame(minWidth: 60, alignment: .trailing)
 
                                     Image("menu_arrow").resizable()
                                         .frame(width: 12, height: 12)
@@ -71,15 +74,34 @@ struct SettingsView: View {
                         HStack {
                             Text("Primary currency")
                             Spacer()
-                            HStack(alignment: .center, spacing: 6) {
-                                Text("USD")
-                                    .fontConfiguration(.body.regular)
 
-                                Image("menu_arrow").resizable()
-                                    .frame(width: 12, height: 12)
-                                    .padding(.top, 2)
+                            Menu {
+                                ForEach(viewModel.currencies) { currency in
+                                    Button {
+                                        Task { await viewModel.switchCurrency(to: currency.id) }
+                                    } label: {
+                                        HStack {
+                                            Text(currency.title)
+                                            Spacer()
+
+                                            if currency.isActive {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack(alignment: .center, spacing: 6) {
+                                    Text(viewModel.currencies.first(where: { $0.isActive })?.title ?? "")
+                                        .fontConfiguration(.body.regular)
+                                        .frame(minWidth: 60, alignment: .trailing)
+
+                                    Image("menu_arrow").resizable()
+                                        .frame(width: 12, height: 12)
+                                        .padding(.top, 2)
+                                }
+                                .foregroundColor(.accent.app)
                             }
-                            .foregroundColor(.accent.app)
                         }
                         .fontConfiguration(.body.regular)
                         .foregroundColor(.text.primary)

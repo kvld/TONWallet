@@ -41,6 +41,8 @@ public struct ScreenContainer<Content: View>: View {
     private let navigationBarLeftButton: NavigationBarButton?
     private let navigationBarRightButton: NavigationBarButton?
     private let navigationBarTitleAlwaysVisible: Bool
+    private let navigationBarOnLeftButtonTap: (() -> Void)?
+    private let navigationBarOnRightButtonTap: (() -> Void)?
     private let wrapInScrollView: Bool
     private let extendBarHeight: Bool
     private let backgroundColor: Color
@@ -58,6 +60,8 @@ public struct ScreenContainer<Content: View>: View {
         navigationBarTitleAlwaysVisible: Bool = false,
         navigationBarLeftButton: NavigationBarButton? = .back,
         navigationBarRightButton: NavigationBarButton? = nil,
+        navigationBarOnLeftButtonTap: (() -> Void)? = nil,
+        navigationBarOnRightButtonTap: (() -> Void)? = nil,
         extendBarHeight: Bool = false,
         wrapInScrollView: Bool = true,
         backgroundColor: Color = .white,
@@ -68,6 +72,8 @@ public struct ScreenContainer<Content: View>: View {
         self.navigationBarTitleAlwaysVisible = navigationBarTitleAlwaysVisible
         self.navigationBarLeftButton = navigationBarLeftButton
         self.navigationBarRightButton = navigationBarRightButton
+        self.navigationBarOnLeftButtonTap = navigationBarOnLeftButtonTap
+        self.navigationBarOnRightButtonTap = navigationBarOnRightButtonTap
         self.wrapInScrollView = wrapInScrollView
         self.extendBarHeight = extendBarHeight
         self.backgroundColor = backgroundColor
@@ -123,7 +129,9 @@ public struct ScreenContainer<Content: View>: View {
                                 isTitleVisible: -scrollOffset > navigationBarTitleAnchorOffset
                                     || navigationBarTitleAlwaysVisible,
                                 leftButton: navigationBarLeftButton,
-                                rightButton: navigationBarRightButton
+                                rightButton: navigationBarRightButton,
+                                onLeftButton: navigationBarOnLeftButtonTap,
+                                onRightButton: navigationBarOnRightButtonTap
                             )
                         } else {
                             EmptyView()
@@ -163,17 +171,23 @@ public struct NavigationBar: View {
     let isTitleVisible: Bool
     let leftButton: NavigationBarButton?
     let rightButton: NavigationBarButton?
+    let onLeftButton: (() -> Void)?
+    let onRightButton: (() -> Void)?
 
     public init(
         title: String?,
         isTitleVisible: Bool,
         leftButton: NavigationBarButton?,
-        rightButton: NavigationBarButton?
+        rightButton: NavigationBarButton?,
+        onLeftButton: (() -> Void)? = nil,
+        onRightButton: (() -> Void)? = nil
     ) {
         self.title = title
         self.isTitleVisible = isTitleVisible
         self.leftButton = leftButton
         self.rightButton = rightButton
+        self.onLeftButton = onLeftButton
+        self.onRightButton = onRightButton
     }
 
     public var body: some View {
@@ -206,7 +220,11 @@ public struct NavigationBar: View {
                     }
                 }
                 .onTapWithFeedback {
-                    presentationMode.wrappedValue.dismiss()
+                    if let onLeftButton {
+                        onLeftButton()
+                    } else {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
                 .foregroundColor(Color.accent.app)
                 .padding(.leading, 9)
@@ -248,7 +266,11 @@ public struct NavigationBar: View {
                     }
                 }
                 .onTapWithFeedback {
-                    presentationMode.wrappedValue.dismiss()
+                    if let onRightButton {
+                        onRightButton()
+                    } else {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
                 .foregroundColor(Color.accent.app)
                 .padding(.trailing, 9)

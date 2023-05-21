@@ -9,6 +9,7 @@ import Components
 
 struct SendAddressView: View {
     @ObservedObject var viewModel: SendViewModel
+    let onClose: () -> Void
 
     @State private var address: String = ""
 
@@ -17,6 +18,7 @@ struct SendAddressView: View {
             navigationBarTitle: "Send TON",
             navigationBarTitleAlwaysVisible: true,
             navigationBarLeftButton: .cancel,
+            navigationBarOnLeftButtonTap: onClose,
             extendBarHeight: true
         ) { proxy in
             ZStack(alignment: .bottom) {

@@ -81,7 +81,7 @@ extension SendViewModel {
     @MainActor
     public func submit(address: String) async {
         guard !address.isEmpty, !state.isLoading,
-              let currentAddress = configService.lastKnownWallet.walletInfo?.address else {
+              let currentAddress = configService.config.lastUsedWallet?.address else {
             return
         }
 
@@ -135,7 +135,7 @@ extension SendViewModel {
     @MainActor
     public func submit(amount: String) async {
         guard !state.hasInsufficientFunds, !state.isLoading, let value = amount.asDouble,
-              let walletInfo = configService.lastKnownWallet.walletInfo,
+              let walletInfo = configService.config.lastUsedWallet,
               let destination = state.address else {
             return
         }
@@ -166,7 +166,7 @@ extension SendViewModel {
 
         state.comment = comment.isEmpty ? nil : comment
 
-        let credentials = configService.config.value.securityConfirmation
+        let credentials = configService.config.securityConfirmation
 
         if biometricService.isSupportBiometric, credentials.isBiometricEnabled {
             let result = await biometricService.evaluate()
@@ -186,7 +186,7 @@ extension SendViewModel {
 
     @MainActor
     public func showWaitingState() async {
-        guard let walletInfo = configService.lastKnownWallet.walletInfo else {
+        guard let walletInfo = configService.config.lastUsedWallet else {
             return
         }
 
@@ -215,7 +215,7 @@ extension SendViewModel {
     @MainActor
     private func sendTransaction() async {
         guard !state.isLoading, let amount = state.amount, let destination = state.address,
-              let walletInfo = configService.lastKnownWallet.walletInfo else {
+              let walletInfo = configService.config.lastUsedWallet else {
             return
         }
 

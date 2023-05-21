@@ -21,7 +21,10 @@ final class SettingsRouter: HostingRouter<AnyView, SettingsModule> {
         let module = SettingsModule(
             configService: resolve(),
             tonService: resolve(),
-            biometricService: resolve()
+            biometricService: resolve(),
+            onClose: { [weak parentNavigationRouter] in
+                parentNavigationRouter?.dismissTopmost()
+            }
         )
         super.init(view: module.view, module: module)
 
@@ -80,7 +83,12 @@ extension SettingsRouter: SettingsModuleOutput {
     func showDeleteConfirmation(onSuccess: @escaping () -> Void) {
         let actions: [UIAlertAction] = [
             .init(title: "Cancel", style: .cancel),
-            .init(title: "Delete", style: .destructive) { _ in
+            .init(title: "Delete", style: .destructive) { [weak parentNavigationRouter] _ in
+                guard let parentNavigationRouter else {
+                    return
+                }
+
+                parentNavigationRouter.dismissTopmost()
                 onSuccess()
             }
         ]

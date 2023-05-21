@@ -46,6 +46,7 @@ public protocol WizardViewModelOutput: AnyObject {
     func showImport()
     func showImportSomeWordsEmptyAlert()
     func showImportWrongWordAlert()
+    func showForgotMnemonicWords()
 }
 
 public final class WizardViewModel: ObservableObject {
@@ -78,6 +79,7 @@ extension WizardViewModel {
                 await output?.showCongratulations()
             } catch {
                 // TODO: error
+                print("DD ->", error)
             }
         }
     }
@@ -206,6 +208,11 @@ extension WizardViewModel {
     @MainActor
     public func skipBiometric() {
         try? completeWizard()
+    }
+
+    @MainActor
+    public func showForgotMnemonicWords() {
+        output?.showForgotMnemonicWords()
     }
 
     // MARK: - Private

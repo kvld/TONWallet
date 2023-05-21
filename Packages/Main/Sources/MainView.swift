@@ -67,7 +67,9 @@ struct MainView: View {
     private var navigationBarBalanceView: some View {
         if case let .idle(model) = viewModel.state {
             SmallBalanceView(
-                model: model.isLoading ? .updating : .idle(balance: model.balance.formatted, fiatRate: nil)
+                model: model.isLoading
+                    ? .updating
+                : .idle(balance: model.balance.formatted, fiatRate: model.fiatBalance?.value)
             )
             .opacity(model.isLoading || isBalanceInNavigationBarTitleVisible ? 1.0 : 0.0)
         }

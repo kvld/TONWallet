@@ -15,10 +15,6 @@ public enum WalletType: String, Codable, CaseIterable {
     public static var `default`: WalletType {
         .v4r2
     }
-
-    public static var allCases: [WalletType] {
-        [.v3r1, .v3r2, .v4r2]
-    }
 }
 
 protocol Wallet: Contract {

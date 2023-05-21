@@ -8,8 +8,13 @@ import SendState
 import SwiftUI
 
 final class SendAddressRouter: HostingRouter<AnyView, SendAddressModule> {
-    init(viewModel: SendViewModel) {
-        let module = SendAddressModule(viewModel: viewModel)
+    init(viewModel: SendViewModel, parentNavigationRouter: NavigationRouter) {
+        let module = SendAddressModule(
+            viewModel: viewModel,
+            onClose: { [weak parentNavigationRouter] in
+                parentNavigationRouter?.dismissTopmost()
+            }
+        )
 
         super.init(view: module.view, module: module)
     }

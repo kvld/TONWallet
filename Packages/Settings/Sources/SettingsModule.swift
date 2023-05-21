@@ -28,7 +28,12 @@ public final class SettingsModule {
         }
     }
 
-    public init(configService: ConfigService, tonService: TONService, biometricService: BiometricService) {
+    public init(
+        configService: ConfigService,
+        tonService: TONService,
+        biometricService: BiometricService,
+        onClose: @escaping () -> Void
+    ) {
         let viewModel = SettingsViewModel(
             configService: configService,
             tonService: tonService,
@@ -36,6 +41,6 @@ public final class SettingsModule {
         )
 
         self.viewModel = viewModel
-        self.view = SettingsView(viewModel: viewModel).eraseToAnyView()
+        self.view = SettingsView(viewModel: viewModel, onClose: onClose).eraseToAnyView()
     }
 }

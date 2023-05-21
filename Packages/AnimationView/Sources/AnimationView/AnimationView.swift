@@ -11,12 +11,14 @@ final class _AnimationView: UIView {
     private let animation: RLottieAnimation
     private let repeatInfinitely: Bool
     private var size: CGSize = .zero
+    private let finalProgress: Double
 
     private let imageView = UIImageView()
 
-    init(frame: CGRect, animationName: String, repeatInfinitely: Bool) {
+    init(frame: CGRect, animationName: String, repeatInfinitely: Bool, finalProgress: Double) {
         self.animation = RLottieAnimation(animationName: animationName)
         self.repeatInfinitely = repeatInfinitely
+        self.finalProgress = finalProgress
 
         super.init(frame: frame)
 
@@ -42,9 +44,12 @@ final class _AnimationView: UIView {
             Task { @MainActor in
                 let animation = await animation.render(in: renderSize)
 
-                imageView.animationImages = animation?.images ?? []
+                let framesCount = animation?.images?.count ?? 0
+                let animationFramesCount = Int(Double(framesCount) * finalProgress)
+
+                imageView.animationImages = Array(animation?.images?.prefix(animationFramesCount) ?? .init())
                 imageView.animationRepeatCount = repeatInfinitely ? 0 : 1
-                imageView.animationDuration = animation?.duration ?? 0.0
+                imageView.animationDuration = (animation?.duration ?? 0.0) * finalProgress
                 imageView.image = imageView.animationImages?.last
 
                 imageView.startAnimating()
@@ -56,14 +61,21 @@ final class _AnimationView: UIView {
 public struct AnimationView: UIViewRepresentable {
     private let animationName: String
     private let repeatInfinitely: Bool
+    private let finalProgress: Double
 
-    public init(animationName: String, repeatInfinitely: Bool = true) {
+    public init(animationName: String, repeatInfinitely: Bool = true, finalProgress: Double = 1.0) {
         self.animationName = animationName
         self.repeatInfinitely = repeatInfinitely
+        self.finalProgress = finalProgress
     }
 
     public func makeUIView(context: Context) -> some UIView {
-        _AnimationView(frame: .zero, animationName: animationName, repeatInfinitely: repeatInfinitely)
+        _AnimationView(
+            frame: .zero,
+            animationName: animationName,
+            repeatInfinitely: repeatInfinitely,
+            finalProgress: finalProgress
+        )
     }
 
     public func updateUIView(_ uiView: some UIView, context: Context) { }

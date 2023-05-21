@@ -66,3 +66,8 @@ extension Nanogram {
     }
 }
 
+extension Nanogram {
+    public func convert(with rate: Double) -> Double {
+        (Double(value) / 1_000_000_000.0) * rate
+    }
+}

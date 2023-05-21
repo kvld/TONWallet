@@ -29,15 +29,7 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let biometricService = BiometricService()
-
-        let viewModel = WizardViewModel(
-            tonService: resolve(),
-            configService: resolve(),
-            biometricService: biometricService
-        )
-
-        let router = WizardRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
+        let router = WizardRouter(parentNavigationRouter: parentNavigationRouter)
         parentNavigationRouter.present(router: router)
     }
 

@@ -10,7 +10,7 @@ import SwiftUIHelpers
 public final class SendAddressModule {
     public let view: AnyView
     
-    public init(viewModel: SendViewModel) {
-        self.view = SendAddressView(viewModel: viewModel).eraseToAnyView()
+    public init(viewModel: SendViewModel, onClose: @escaping () -> Void) {
+        self.view = SendAddressView(viewModel: viewModel, onClose: onClose).eraseToAnyView()
     }
 }

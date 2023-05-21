@@ -32,7 +32,7 @@ final class SendRouter: Router, SendViewModelOutput {
             controller.navigationBar.isHidden = true
         }
 
-        let sendInitialRouter = SendAddressRouter(viewModel: viewModel)
+        let sendInitialRouter = SendAddressRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)
 
         navigationRouter.embed(router: sendInitialRouter)
 

@@ -14,19 +14,23 @@ final class WizardForgotMnemonicRouter: HostingRouter<AnyView, WizardInfoModule>
                 title: "Too Bad!",
                 text: "Without the secret words you can’t restore access to the wallet.",
                 isNavigationBarVisible: true,
-                primaryButton: AnyView(EmptyView()),
-                secondaryButton: nil
-//                primaryButton: .init(
-//                    title: "Enter 24 secret words",
-//                    action: onReturnToMnemonicInput
-//                ),
-//                secondaryButton: .init(
-//                    title: "Create a new empty wallet instead",
-//                    action: onReturnToInitial
-//                )
+                primaryButton: Self.makePrimaryButton(onTap: onReturnToMnemonicInput),
+                secondaryButton: Self.makeSecondaryButton(onTap: onReturnToInitial)
             )
         )
 
         super.init(view: module.view, module: module)
+    }
+
+    private static func makePrimaryButton(onTap: @escaping () -> Void) -> AnyView {
+        Button("Enter 24 secret words", action: onTap)
+            .buttonStyle(.action())
+            .eraseToAnyView()
+    }
+
+    private static func makeSecondaryButton(onTap: @escaping () -> Void) -> AnyView {
+        Button("Create an empty wallet", action: onTap)
+            .buttonStyle(.action(background: .outline))
+            .eraseToAnyView()
     }
 }

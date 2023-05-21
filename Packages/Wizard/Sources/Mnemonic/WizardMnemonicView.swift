@@ -57,7 +57,7 @@ struct WizardMnemonicView<ViewModel: WizardMnemonicViewModel>: View {
                             MnemonicWordColumnView(
                                 maxWidthNumber: leftColumnWords.map(\.0).last ?? 0,
                                 number: word.0,
-                                maxWidthWord: leftColumnWords.map(\.1).max(by: { $0.count < $1.count }) ?? word.1,
+                                maxWidthWord: leftColumnWords.map(\.1).max(by: { $0.width < $1.width }) ?? word.1,
                                 word: word.1
                             )
                         }
@@ -70,7 +70,7 @@ struct WizardMnemonicView<ViewModel: WizardMnemonicViewModel>: View {
                             MnemonicWordColumnView(
                                 maxWidthNumber: rightColumnWords.map(\.0).last ?? 0,
                                 number: word.0,
-                                maxWidthWord: rightColumnWords.map(\.1).max(by: { $0.count < $1.count }) ?? word.1,
+                                maxWidthWord: rightColumnWords.map(\.1).max(by: { $0.width < $1.width }) ?? word.1,
                                 word: word.1
                             )
                         }
@@ -90,6 +90,12 @@ struct WizardMnemonicView<ViewModel: WizardMnemonicViewModel>: View {
         .onAppear {
             viewModel.didAppear()
         }
+    }
+}
+
+extension String {
+    fileprivate var width: CGFloat {
+        NSAttributedString(string: self).size().width
     }
 }
 

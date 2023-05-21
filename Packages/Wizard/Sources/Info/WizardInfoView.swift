@@ -18,44 +18,39 @@ public struct WizardInfoView: View {
 
     public var body: some View {
         ScreenContainer(navigationBarVisibility: model.isNavigationBarVisible ? .visible : .preserveSpace) { proxy in
-            ZStack {
-                VStack(spacing: 0) {
-                    VStack(spacing: 0) {
-                        AnimationView(animationName: model.animationName)
-                            .frame(width: 124, height: 124)
-                            .padding(.bottom, 20)
-
-                        Text(model.title)
-                            .fontConfiguration(.title1)
-                            .foregroundColor(.text.primary)
-                            .padding(.bottom, 12)
-
-                        Text(model.text)
-                            .fontConfiguration(.body.regular)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.text.primary)
-                    }
-                    .padding(.top, 150)
-                    .padding(.horizontal, 32)
-
-                    Spacer()
-                }
+            VStack(spacing: 0) {
+                Spacer(minLength: 16)
 
                 VStack(spacing: 0) {
-                    Spacer(minLength: 16)
+                    AnimationView(animationName: model.animationName)
+                        .frame(width: 124, height: 124)
+                        .padding(.bottom, 20)
 
-                    VStack(spacing: 16) {
-                        model.primaryButton
+                    Text(model.title)
+                        .fontConfiguration(.title1)
+                        .foregroundColor(.text.primary)
+                        .padding(.bottom, 12)
 
-                        if let button = model.secondaryButton {
-                            button
-                        } else {
-                            Spacer().frame(height: 50)
-                        }
-                    }
-                    .offset(y: -56)
-                    .padding(.horizontal, 48)
+                    Text(model.text)
+                        .fontConfiguration(.body.regular)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.text.primary)
                 }
+                .padding(.horizontal, 32)
+
+                Spacer(minLength: 16)
+
+                VStack(spacing: 16) {
+                    model.primaryButton
+
+                    if let button = model.secondaryButton {
+                        button
+                    } else {
+                        Spacer().frame(height: 50)
+                    }
+                }
+                .offset(y: -56)
+                .padding(.horizontal, 48)
             }
             .frame(height: proxy.contentSize.height)
         }

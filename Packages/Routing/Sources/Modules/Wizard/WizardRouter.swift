@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import WizardState
 import WizardInfo
+import CommonServices
 
 @MainActor
 final class WizardRouter: Router, WizardViewModelOutput {
@@ -13,13 +14,21 @@ final class WizardRouter: Router, WizardViewModelOutput {
     private let transitioningDelegate: WizardTransitioningDelegate
     private weak var parentNavigationRouter: NavigationRouter?
 
+    private var didShowBiometric = false
+
     private let viewModel: WizardViewModel
 
     var viewController: UIViewController {
         _navigationRouter.viewController
     }
 
-    init(viewModel: WizardViewModel, parentNavigationRouter: NavigationRouter) {
+    init(parentNavigationRouter: NavigationRouter) {
+        let viewModel = WizardViewModel(
+            tonService: resolve(),
+            configService: resolve(),
+            biometricService: resolve()
+        )
+
         let transitioningDelegate = WizardTransitioningDelegate()
 
         let navigationRouter = NavigationRouter { controller in
@@ -116,11 +125,18 @@ final class WizardRouter: Router, WizardViewModelOutput {
     func showBiometric() {
         let router = WizardBiometricRouter(viewModel: viewModel)
         router.viewController.modalPresentationStyle = .fullScreen
+
+        didShowBiometric = true
         _navigationRouter.present(router: router)
     }
 
     func showFinal() {
-        let router = WizardReadyRouter { [parentNavigationRouter] in
+        if didShowBiometric {
+            didShowBiometric = false
+            parentNavigationRouter?.dismissTopmost()
+        }
+
+        let router = WizardReadyRouter { [weak parentNavigationRouter] in
             parentNavigationRouter?.dismissTopmost()
         }
         _navigationRouter.push(router: router)
@@ -129,10 +145,14 @@ final class WizardRouter: Router, WizardViewModelOutput {
     func showForgotMnemonicWords() {
         let router = WizardForgotMnemonicRouter(
             onReturnToMnemonicInput: { [weak _navigationRouter] in
-                _navigationRouter?.dismissTopmost()
+                _navigationRouter?.popTopmost()
             },
-            onReturnToInitial: {
-                // TODO: reset stack
+            onReturnToInitial: { [weak self] in
+                guard let self else {
+                    return
+                }
+
+                self._navigationRouter.popToRoot()
             }
         )
         _navigationRouter.push(router: router)

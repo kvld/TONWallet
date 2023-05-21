@@ -16,25 +16,14 @@ public final class NavigationRouter: Router {
 
     public init(withControllerSetup: ((UINavigationController) -> Void)? = nil) {
         let navigationController = UINavigationController()
+        
         navigationController.delegate = navigationControllerDelegate
         withControllerSetup?(navigationController)
 
         self.navigationController = navigationController
 
-        // TODO: handle modal dismiss
         navigationControllerDelegate.didShow = { [weak self] newTopController in
-            guard let self else { return }
-
-            var needDropCount = 0
-            for router in self.children.reversed() {
-                if router.viewController === newTopController {
-                    break
-                } else {
-                    needDropCount += 1
-                }
-            }
-
-            self.children = Array(self.children.dropLast(needDropCount))
+            self?.removeChildren(afterViewController: newTopController)
         }
     }
 
@@ -71,6 +60,25 @@ public final class NavigationRouter: Router {
 
     public func popTopmost(animated: Bool = true) {
         navigationController.popViewController(animated: animated)
+    }
+
+    public func popToRoot(animated: Bool = true) {
+        navigationController.popToRootViewController(animated: animated)
+    }
+
+    // MARK: - Private
+
+    private func removeChildren(afterViewController controller: UIViewController) {
+        var needDropCount = 0
+        for router in children.reversed() {
+            if router.viewController === controller {
+                break
+            } else {
+                needDropCount += 1
+            }
+        }
+
+        children = Array(children.dropLast(needDropCount))
     }
 }
 

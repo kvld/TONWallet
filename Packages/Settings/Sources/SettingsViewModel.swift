@@ -5,13 +5,17 @@
 import SwiftUI
 import TON
 import CommonServices
+import Combine
 
 final class SettingsViewModel: ObservableObject {
     private let configService: ConfigService
     private let tonService: TONService
     private let biometricService: BiometricService
 
+    private var cancellables = Set<AnyCancellable>()
+
     @Published var wallets: [WalletType]
+    @Published var currencies: [Currency]
     @Published var biometricType: BiometricType?
     @Published var isBiometricEnabled: Bool = false {
         didSet {
@@ -28,7 +32,7 @@ final class SettingsViewModel: ObservableObject {
 
         if biometricService.isSupportBiometric {
             self.biometricType = biometricService.isSupportFaceID ? .faceID : .touchID
-            self.isBiometricEnabled = configService.config.value.securityConfirmation.isBiometricEnabled
+            self.isBiometricEnabled = configService.config.securityConfirmation.isBiometricEnabled
         }
 
         self.wallets = TON.WalletType.allCases.map { type in
@@ -43,9 +47,19 @@ final class SettingsViewModel: ObservableObject {
             return WalletType(
                 id: type.rawValue,
                 title: title,
-                isActive: configService.config.value.lastUsedWallet?.type == type
+                isActive: configService.config.lastUsedWallet?.type == type
             )
         }
+
+        self.currencies = CommonServices.Currency.allCases.map { currency in
+            Currency(
+                id: currency.rawValue,
+                title: currency.rawValue,
+                isActive: configService.config.fiatCurrency == currency
+            )
+        }
+
+        bindForUpdate()
     }
 
     func switchWallet(to walletID: String) async {
@@ -53,7 +67,7 @@ final class SettingsViewModel: ObservableObject {
             return
         }
 
-        guard let activeWalletInfo = configService.config.value.lastUsedWallet,
+        guard let activeWalletInfo = configService.config.lastUsedWallet,
               activeWalletInfo.type != walletType else {
             return
         }
@@ -72,9 +86,17 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    func switchCurrency(to currencyID: String) async {
+        guard let currency = CommonServices.Currency(rawValue: currencyID) else {
+            return
+        }
+
+        configService.updateCurrency(fiatCurrency: currency)
+    }
+
     @MainActor
     func showMnemonicWords() async {
-        guard let credentials = configService.config.value.lastUsedWallet?.credentials else {
+        guard let credentials = configService.config.lastUsedWallet?.credentials else {
             return
         }
 
@@ -109,13 +131,49 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Private
 
+    private func bindForUpdate() {
+        configService.configPublisher
+            .removeDuplicates(by: { $0.lastUsedWalletID == $1.lastUsedWalletID })
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] config in
+                guard let self else {
+                    return
+                }
+
+                let lastUsedWallet = config.lastUsedWallet
+
+                self.wallets = self.wallets.map {
+                    var _wallet = $0
+                    _wallet.isActive = lastUsedWallet?.type.rawValue == $0.id
+                    return _wallet
+                }
+            }
+            .store(in: &cancellables)
+
+        configService.configPublisher
+            .removeDuplicates(by: { $0.fiatCurrency == $1.fiatCurrency })
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] config in
+                guard let self else {
+                    return
+                }
+
+                self.currencies = self.currencies.map {
+                    var _currency = $0
+                    _currency.isActive = config.fiatCurrency.rawValue == $0.id
+                    return _currency
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     private func updateBiometricState() {
         configService.updateSecurityInformation(isBiometricEnabled: isBiometricEnabled)
     }
 
     @MainActor
     private func showPasscodeConfirmationAndPerformAction(_ action: @escaping () -> Void) async {
-        let credentials = configService.config.value.securityConfirmation
+        let credentials = configService.config.securityConfirmation
 
         if biometricService.isSupportBiometric, credentials.isBiometricEnabled {
             let result = await biometricService.evaluate()
@@ -134,7 +192,13 @@ extension SettingsViewModel {
     struct WalletType: Identifiable {
         let id: String
         let title: String
-        let isActive: Bool
+        var isActive: Bool
+    }
+
+    struct Currency: Identifiable {
+        let id: String
+        let title: String
+        var isActive: Bool
     }
 
     enum BiometricType {

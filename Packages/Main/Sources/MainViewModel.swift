@@ -5,10 +5,11 @@
 import Foundation
 import SwiftUI
 import TON
+import CommonServices
 import Combine
 
 enum MainViewState {
-    case preparing
+    case preparing(didPresentWizard: Bool)
     case loading
     case idle(Model)
 
@@ -18,12 +19,17 @@ enum MainViewState {
         let balance: FormattedGram
         let address: (full: String, short: String)
         var transactions: [TransactionListModel]
+        var fiatBalance: FiatBalance?
 
         func with(mutation: (inout Model) -> Void) -> Model {
             var new = self
             mutation(&new)
             return new
         }
+    }
+
+    struct FiatBalance {
+        let value: String
     }
 
     enum TransactionListModel: Identifiable {
@@ -63,16 +69,19 @@ final class MainViewModel: ObservableObject {
     private var isInitialized = false
     private var paginationState = PaginationState(isInLoading: false)
     private var walletInfo: WalletInfo?
+    private var activeCurrency: Currency?
     private var cancellables = Set<AnyCancellable>()
 
     private let configService: ConfigService
     private let tonService: TONService
+    private let conversionRateService: ConversionRateService
 
-    @Published var state: MainViewState = .preparing
+    @Published var state: MainViewState = .preparing(didPresentWizard: false)
 
-    init(configService: ConfigService, tonService: TONService) {
+    init(configService: ConfigService, tonService: TONService, conversionRateService: ConversionRateService) {
         self.configService = configService
         self.tonService = tonService
+        self.conversionRateService = conversionRateService
     }
 }
 
@@ -98,20 +107,28 @@ extension MainViewModel {
 
         isInitialized = true
 
-        configService.walletFetchState
-            .filter { !$0.isUnknown }
-            .sink { [weak self] state in
+        configService.configPublisher
+            .sink { [weak self] config in
                 guard let self else {
                     return
                 }
 
-                if case .fetched(let walletInfo) = state, let walletInfo {
+                let needUpdate = self.walletInfo?.uuid != config.lastUsedWalletID
+                    || self.activeCurrency != config.fiatCurrency
+
+                if let walletInfo = config.lastUsedWallet, needUpdate {
                     self.walletInfo = walletInfo
+                    self.activeCurrency = config.fiatCurrency
 
                     Task {
                         await self.loadTransactionsAndBalance()
                     }
-                } else {
+                } else if config.lastUsedWalletID == nil, needUpdate {
+                    if case let .preparing(didPresentWizard) = self.state, didPresentWizard {
+                        return
+                    }
+
+                    self.state = .preparing(didPresentWizard: true)
                     self.output?.showWizard()
                 }
             }
@@ -129,9 +146,13 @@ extension MainViewModel {
             try? await Task.sleep(nanoseconds: 5 * 100_000_000) // for fast refresh, but need debounce
         }
 
+        let rates = try? await Task {
+            try await conversionRateService.getRates()
+        }.value
+
         do {
             let walletState = try await Task {
-                return try await tonService.fetchWalletState(address: walletInfo.address)
+                try await tonService.fetchWalletState(address: walletInfo.address)
             }.value
 
             let transactions = try await Task {
@@ -141,6 +162,15 @@ extension MainViewModel {
                 )
             }.value
 
+            let fiatBalance: MainViewState.FiatBalance?
+            if let activeCurrency {
+                fiatBalance = rates?[activeCurrency]
+                    .flatMap { walletState.balance.convert(with: $0) }
+                    .flatMap { MainViewState.FiatBalance.make(from: $0, currency: activeCurrency) }
+            } else {
+                fiatBalance = nil
+            }
+
             let model = MainViewState.Model(
                 isLoading: false,
                 canLoadMore: transactions.lastTransaction != nil,
@@ -149,7 +179,8 @@ extension MainViewModel {
                 transactions: MainViewState.TransactionListModel.makeList(
                     from: transactions.transactions,
                     myAddress: walletInfo.address
-                )
+                ),
+                fiatBalance: fiatBalance
             )
 
             state = .idle(model)
@@ -248,6 +279,20 @@ extension MainViewModel {
     @MainActor
     func showSettings() {
         output?.showSettings()
+    }
+}
+
+extension MainViewState.FiatBalance {
+    static func make(from value: Double, currency: Currency) -> MainViewState.FiatBalance? {
+        if value.isEqual(to: 0.0) {
+            return nil
+        }
+
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.maximumFractionDigits = 2
+
+        return .init(value: formatter.string(from: value as NSNumber) ?? "\(value) \(currency.rawValue)")
     }
 }
 

@@ -41,6 +41,10 @@ final class ServiceLocator {
         register {
             DeeplinkService()
         }
+
+        register {
+            ConversionRateService()
+        }
     }
 }
 

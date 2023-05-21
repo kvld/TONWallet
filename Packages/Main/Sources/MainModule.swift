@@ -30,7 +30,7 @@ public final class MainModule {
     }
 
     public init() {
-        let viewModel = MainViewModel(configService: resolve(), tonService: resolve())
+        let viewModel = MainViewModel(configService: resolve(), tonService: resolve(), conversionRateService: resolve())
 
         self.viewModel = viewModel
         self.view = AnyView(MainView(viewModel: viewModel))
