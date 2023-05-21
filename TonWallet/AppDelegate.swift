@@ -1,7 +1,4 @@
 //
-//  AppDelegate.swift
-//  TonWallet
-//
 //  Created by Vladislav Kiriukhin on 24.03.2023.
 //
 
@@ -14,7 +11,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         configurationForConnecting connectingSceneSession: UISceneSession,
         options: UIScene.ConnectionOptions
     ) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 }
 

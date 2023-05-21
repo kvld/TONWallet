@@ -147,6 +147,9 @@ struct SendAmountView: View {
                 amount = useFullBalance ? balance : ""
             }
         }
+        .onAppear {
+            amount = viewModel.state.amount?.formatted.formatted ?? ""
+        }
     }
 }
 
@@ -267,6 +270,8 @@ private struct AmountTextField: UIViewRepresentable {
     func makeUIView(context: Context) -> TextField {
         let textField = TextField(frame: .zero, text: _text, width: _width, maxWidth: maxWidth)
         textField.keyboardType = .decimalPad
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
         textField.textColor = textColor
         return textField
     }

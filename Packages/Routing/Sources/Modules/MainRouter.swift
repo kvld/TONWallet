@@ -88,7 +88,11 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let router = QRScannerRouter(parentNavigationRouter: parentNavigationRouter, completion: { _ in })
+        let router = QRScannerRouter(parentNavigationRouter: parentNavigationRouter) {
+            if let url = URL(string: $0), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            }
+        }
         parentNavigationRouter.present(router: router)
     }
 

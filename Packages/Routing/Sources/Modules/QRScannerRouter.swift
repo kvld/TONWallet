@@ -17,9 +17,10 @@ final class QRScannerRouter: Router {
 
         controller.onSettingsOpenTap = { [weak self] in self?.openSettings() }
         controller.onCloseTap = { [weak self] in self?.close() }
-        controller.onSuccessfulScan = { [weak self] in
-            self?.close()
-            completion($0)
+        controller.onSuccessfulScan = { [weak self] result in
+            self?.close {
+                completion(result)
+            }
         }
     }
 
@@ -29,7 +30,7 @@ final class QRScannerRouter: Router {
         }
     }
 
-    func close() {
-        parentNavigationRouter?.dismissTopmost()
+    func close(completion: (() -> Void)? = nil) {
+        parentNavigationRouter?.dismissTopmost(completion: completion)
     }
 }

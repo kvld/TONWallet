@@ -16,7 +16,12 @@ public struct SendState {
     public var hasInsufficientFunds = false
     public var fee: Nanogram?
 
-    static var initial: SendState = .init()
+    static func makeInitial(with predefinedParams: PredefinedStateParameters) -> SendState {
+        .init(
+            address: predefinedParams.address.flatMap { .init($0) },
+            amount: predefinedParams.amount.flatMap { .init(max(0, $0)) }
+        )
+    }
 }
 
 @MainActor
@@ -28,6 +33,19 @@ public protocol SendViewModelOutput: AnyObject {
     func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void)
 }
 
+public struct PredefinedStateParameters {
+    public let address: String?
+    public let amount: Int64?
+
+    public init(
+        address: String? = nil,
+        amount: Int64? = nil
+    ) {
+        self.address = address
+        self.amount = amount
+    }
+}
+
 public final class SendViewModel: ObservableObject {
     private let tonService: TONService
     private let configService: ConfigService
@@ -37,9 +55,14 @@ public final class SendViewModel: ObservableObject {
 
     public weak var output: SendViewModelOutput?
 
-    public init(tonService: TONService, configService: ConfigService, biometricService: BiometricService) {
+    public init(
+        predefinedParameters: PredefinedStateParameters = .init(),
+        tonService: TONService,
+        configService: ConfigService,
+        biometricService: BiometricService
+    ) {
         self.tonService = tonService
-        self.state = .initial
+        self.state = .makeInitial(with: predefinedParameters)
         self.configService = configService
         self.biometricService = biometricService
     }

@@ -10,7 +10,6 @@
 		4610CCEF29CDB9DF002F3EF0 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 4610CCEE29CDB9DF002F3EF0 /* Routing */; };
 		46D6ED8029CD96B100D01330 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D6ED7F29CD96B100D01330 /* AppDelegate.swift */; };
 		46D6ED8229CD96B100D01330 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D6ED8129CD96B100D01330 /* SceneDelegate.swift */; };
-		46D6ED8429CD96B100D01330 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D6ED8329CD96B100D01330 /* ViewController.swift */; };
 		46D6ED8929CD96B300D01330 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46D6ED8829CD96B300D01330 /* Assets.xcassets */; };
 		46D6ED8C29CD96B300D01330 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46D6ED8A29CD96B300D01330 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -36,7 +35,6 @@
 		46D6ED7C29CD96B100D01330 /* TonWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TonWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		46D6ED7F29CD96B100D01330 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		46D6ED8129CD96B100D01330 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		46D6ED8329CD96B100D01330 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		46D6ED8829CD96B300D01330 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		46D6ED8B29CD96B300D01330 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		46D6ED8D29CD96B300D01330 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 			children = (
 				46D6ED7F29CD96B100D01330 /* AppDelegate.swift */,
 				46D6ED8129CD96B100D01330 /* SceneDelegate.swift */,
-				46D6ED8329CD96B100D01330 /* ViewController.swift */,
 				46D6ED8829CD96B300D01330 /* Assets.xcassets */,
 				46D6ED8A29CD96B300D01330 /* LaunchScreen.storyboard */,
 				46D6ED8D29CD96B300D01330 /* Info.plist */,
@@ -193,7 +190,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46D6ED8429CD96B100D01330 /* ViewController.swift in Sources */,
 				46D6ED8029CD96B100D01330 /* AppDelegate.swift in Sources */,
 				46D6ED8229CD96B100D01330 /* SceneDelegate.swift in Sources */,
 			);
@@ -341,6 +337,8 @@
 				DEVELOPMENT_TEAM = 7S8Z9T8WFU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TonWallet/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Need to access for QR code scanning";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Need to confirm your actions without password";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -379,6 +377,8 @@
 				DEVELOPMENT_TEAM = 7S8Z9T8WFU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TonWallet/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Need to access for QR code scanning";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Need to confirm your actions without password";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

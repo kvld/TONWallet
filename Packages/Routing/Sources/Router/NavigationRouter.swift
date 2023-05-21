@@ -60,12 +60,12 @@ public final class NavigationRouter: Router {
         navigationController.pushViewController(router.viewController, animated: true)
     }
 
-    public func dismissTopmost() {
+    public func dismissTopmost(completion: (() -> Void)? = nil) {
         guard let lastRouter = children.last else {
             return
         }
 
-        lastRouter.viewController.dismiss(animated: true)
+        lastRouter.viewController.dismiss(animated: true, completion: completion)
         children = children.filter { $0.viewController !== lastRouter.viewController }
     }
 

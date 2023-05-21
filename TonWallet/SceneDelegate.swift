@@ -1,7 +1,4 @@
 //
-//  SceneDelegate.swift
-//  TonWallet
-//
 //  Created by Vladislav Kiriukhin on 24.03.2023.
 //
 
@@ -10,10 +7,16 @@ import SwiftUI
 import Routing
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    var window: UIWindow?
-    var mainNavigationRouter: NavigationRouter?
+    private var mainNavigationRouter: NavigationRouter?
+    private var deeplinkRouter: DeeplinkRouter?
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    var window: UIWindow?
+
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
         guard let scene = scene as? UIWindowScene else { return }
 
         let window = UIWindow(windowScene: scene)
@@ -25,11 +28,22 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let mainRouter = MainRouter(parentNavigationRouter: mainNavigationRouter)
         mainNavigationRouter.embed(router: mainRouter)
 
+        let deeplinkRouter = DeeplinkRouter(presentingRouter: mainNavigationRouter)
+
         self.window = window
         self.mainNavigationRouter = mainNavigationRouter
+        self.deeplinkRouter = deeplinkRouter
 
         window.rootViewController = mainNavigationRouter.viewController
         window.makeKeyAndVisible()
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else {
+            return
+        }
+
+        deeplinkRouter?.handleDeeplink(for: url)
     }
 }
 

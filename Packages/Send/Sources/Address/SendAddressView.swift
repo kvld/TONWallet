@@ -83,6 +83,9 @@ struct SendAddressView: View {
             }
             .frame(height: proxy.contentSize.height)
         }
+        .onAppear {
+            address = viewModel.state.address?.value ?? ""
+        }
     }
 }
 
