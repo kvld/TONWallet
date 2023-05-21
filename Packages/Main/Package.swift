@@ -24,7 +24,8 @@ let package = Package(
                 .product(name: "AnimationView", package: "AnimationView"),
                 .product(name: "SwiftUIBackports", package: "SwiftUIUtils"),
                 .product(name: "SwiftUIHelpers", package: "SwiftUIUtils"),
-                .product(name: "TON", package: "Services")
+                .product(name: "TON", package: "Services"),
+                .product(name: "CommonServices", package: "Services")
             ],
             path: "Sources/"
         )

@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import CommonServices
 import TON
 
 public protocol MainModuleOutput: AnyObject {
@@ -29,12 +30,7 @@ public final class MainModule {
     }
 
     public init() {
-        let configService = ConfigService(storage: .init())
-        let tonService = TONService(
-            storage: .init(),
-            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
-        )
-        let viewModel = MainViewModel(configService: configService, tonService: tonService)
+        let viewModel = MainViewModel(configService: resolve(), tonService: resolve())
 
         self.viewModel = viewModel
         self.view = AnyView(MainView(viewModel: viewModel))

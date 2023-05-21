@@ -76,8 +76,22 @@ extension TONClient {
     public func execute<Function: TLFunction>(
         _ function: Function
     ) async throws -> Function.ReturnType {
-        let uuid = UUID()
-        return try await self.execute(function, uuid: uuid)
+        for _ in 0..<5 {
+            let uuid = UUID()
+
+            do {
+                let result: Function.ReturnType = try await self.execute(function, uuid: uuid)
+                return result
+            } catch {
+                if let error = error as? TONSchema.Error, error.code >= 500 {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        throw ReachedMaxRetriesCountError()
     }
 
     private func execute<Function: TLFunction>(

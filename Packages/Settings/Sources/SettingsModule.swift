@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import SwiftUIHelpers
 import TON
+import CommonServices
 
 public protocol SettingsModuleOutput: AnyObject {
     func showPasscodeConfirmation(passcode: String, onSuccess: @escaping () -> Void)
@@ -27,11 +28,11 @@ public final class SettingsModule {
         }
     }
 
-    public init(configService: ConfigService, tonService: TONService) {
+    public init(configService: ConfigService, tonService: TONService, biometricService: BiometricService) {
         let viewModel = SettingsViewModel(
             configService: configService,
             tonService: tonService,
-            biometricService: .init()
+            biometricService: biometricService
         )
 
         self.viewModel = viewModel

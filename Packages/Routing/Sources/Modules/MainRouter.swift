@@ -29,17 +29,11 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let tonService = TONService(
-            storage: .init(),
-            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
-        )
-        let configService = ConfigService(storage: .init())
-
         let biometricService = BiometricService()
 
         let viewModel = WizardViewModel(
-            tonService: tonService,
-            configService: configService,
+            tonService: resolve(),
+            configService: resolve(),
             biometricService: biometricService
         )
 
@@ -62,16 +56,10 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-        let tonService = TONService(
-            storage: .init(),
-            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
-        )
-        let configService = ConfigService(storage: .init())
-
         let viewModel = SendViewModel(
-            tonService: tonService,
-            configService: configService,
-            biometricService: .init()
+            tonService: resolve(),
+            configService: resolve(),
+            biometricService: resolve()
         )
 
         let router = SendRouter(viewModel: viewModel, parentNavigationRouter: parentNavigationRouter)

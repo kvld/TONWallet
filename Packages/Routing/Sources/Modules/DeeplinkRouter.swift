@@ -4,6 +4,7 @@
 
 import Foundation
 import TON
+import CommonServices
 import SendState
 
 public final class DeeplinkRouter {
@@ -42,16 +43,10 @@ public final class DeeplinkRouter {
             amount: components.queryItems?.first(where: { $0.name == "amount" })?.value.flatMap { Int64($0) }
         )
 
-        let tonService = TONService(
-            storage: .init(),
-            configURL: URL(string: "https://ton.org/testnet-global.config.json")!
-        )
-        let configService = ConfigService(storage: .init())
-
         let viewModel = SendViewModel(
             predefinedParameters: predefinedParameters,
-            tonService: tonService,
-            configService: configService,
+            tonService: resolve(),
+            configService: resolve(),
             biometricService: .init()
         )
 

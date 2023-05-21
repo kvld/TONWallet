@@ -8,6 +8,7 @@ import TON
 import Settings
 import WizardMnemonic
 import WizardPasscode
+import CommonServices
 
 final class SettingsRouter: HostingRouter<AnyView, SettingsModule> {
     private weak var navigationRouter: NavigationRouter?
@@ -18,8 +19,9 @@ final class SettingsRouter: HostingRouter<AnyView, SettingsModule> {
         self.navigationRouter = navigationRouter
 
         let module = SettingsModule(
-            configService: .init(storage: .init()),
-            tonService: .init(storage: .init(), configURL: URL(string: "https://ton.org/testnet-global.config.json")!)
+            configService: resolve(),
+            tonService: resolve(),
+            biometricService: resolve()
         )
         super.init(view: module.view, module: module)
 
