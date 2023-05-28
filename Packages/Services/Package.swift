@@ -32,7 +32,6 @@ let package = Package(
         .target(
             name: "TON",
             dependencies: [
-                .product(name: "Mnemonic", package: "TONKit"),
                 .product(name: "TONClient", package: "TONKit"),
                 .product(name: "TONSchema", package: "TONKit"),
                 .product(name: "BOC", package: "TONKit"),

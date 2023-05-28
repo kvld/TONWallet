@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import Mnemonic
 import TONClient
 import TONSchema
 import Combine

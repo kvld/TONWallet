@@ -15,7 +15,7 @@ rm -rf ton
 git clone --recurse-submodules https://github.com/ton-blockchain/ton
 cd ton
 
-#git apply ../wallet_v4.patch
+git apply ../wallet_v4.patch
 
 ton_path=$(pwd)
 
