@@ -110,6 +110,7 @@ struct WizardPasscodeView<ViewModel: WizardPasscodeViewModel>: View {
 
 private struct PasscodeInputView: View {
     @State private var typedPasscode: String = ""
+    @State private var isActive = false
 
     let length: Int
     let attemptsCount: Int
@@ -117,8 +118,8 @@ private struct PasscodeInputView: View {
 
     var body: some View {
         ZStack {
-            _TextField(text: $typedPasscode)
-                .opacity(0.001)
+            _TextField(text: $typedPasscode, isActive: isActive)
+                .opacity(0.0)
 
             HStack(spacing: 16) {
                 ForEach(0..<length, id: \.self) { idx in
@@ -148,11 +149,17 @@ private struct PasscodeInputView: View {
                 onSuccess(String(newValue.prefix(length)))
             }
         }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isActive = true
+            }
+        }
     }
 }
 
 private struct _TextField: UIViewRepresentable {
     @Binding var text: String
+    let isActive: Bool
 
     final class TextField: UITextField {
         var _text: Binding<String>
@@ -183,19 +190,13 @@ private struct _TextField: UIViewRepresentable {
         let textField = TextField(frame: .zero, text: _text)
         textField.keyboardType = .decimalPad
 
-        UIView.performWithoutAnimation {
-            DispatchQueue.main.async {
-                textField.becomeFirstResponder()
-            }
-        }
-
         return textField
     }
 
     func updateUIView(_ uiView: TextField, context: Context) {
         uiView.text = _text.wrappedValue
 
-        UIView.performWithoutAnimation {
+        if isActive, !uiView.isFirstResponder {
             DispatchQueue.main.async {
                 uiView.becomeFirstResponder()
             }

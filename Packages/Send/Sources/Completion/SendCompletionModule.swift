@@ -15,7 +15,7 @@ public enum SendCompletionStage {
 public final class SendCompletionModule {
     public let view: AnyView
 
-    public init(stage: SendCompletionStage, viewModel: SendViewModel) {
-        self.view = SendCompletionView(stage: stage, viewModel: viewModel).eraseToAnyView()
+    public init(stage: SendCompletionStage, viewModel: SendViewModel, onClose: @escaping () -> Void) {
+        self.view = SendCompletionView(stage: stage, viewModel: viewModel, onClose: onClose).eraseToAnyView()
     }
 }

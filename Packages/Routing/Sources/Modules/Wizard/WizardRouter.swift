@@ -130,13 +130,13 @@ final class WizardRouter: Router, WizardViewModelOutput {
         _navigationRouter.present(router: router)
     }
 
-    func showFinal() {
+    func showFinal(afterImport: Bool) {
         if didShowBiometric {
             didShowBiometric = false
-            parentNavigationRouter?.dismissTopmost()
+            _navigationRouter.dismissTopmost(animated: false)
         }
 
-        let router = WizardReadyRouter { [weak parentNavigationRouter] in
+        let router = WizardReadyRouter(afterImport: afterImport) { [weak parentNavigationRouter] in
             parentNavigationRouter?.dismissTopmost()
         }
         _navigationRouter.push(router: router)
@@ -284,7 +284,7 @@ private final class WizardDismissAnimationController: NSObject, UIViewController
 
         UIView.animateKeyframes(withDuration: transitionDuration(using: transitionContext), delay: 0.0) {
             UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
-                sourceRollView.transform = .init(translationX: 0, y: initialFrame.height * 0.5) // TODO: normal coord
+                sourceRollView.transform = .init(translationX: 0, y: initialFrame.height * 0.5)
             }
 
             UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.4) {

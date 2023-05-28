@@ -15,7 +15,10 @@ final class TransactionRouter: SheetHostingRouter<AnyView, TransactionModule> {
     init(transaction: TON.Transaction, parentNavigationRouter: NavigationRouter) {
         self.parentNavigationRouter = parentNavigationRouter
 
-        let module = TransactionModule(transaction: transaction)
+        let module = TransactionModule(transaction: transaction) { [weak parentNavigationRouter] in
+            parentNavigationRouter?.dismissTopmost()
+        }
+        
         super.init(view: module.view, module: module)
 
         module.output = self

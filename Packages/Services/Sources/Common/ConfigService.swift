@@ -20,6 +20,7 @@ public struct Config: Codable {
     internal(set) public var wallets: Set<WalletInfo>
     internal(set) public var fiatCurrency: Currency
     internal(set) public var securityConfirmation: SecurityConfirmation
+    var configUUID: UUID? // to drop old configs in keychain
 
     public var lastUsedWallet: WalletInfo? {
         wallets.first(where: { $0.uuid == lastUsedWalletID })
@@ -31,7 +32,11 @@ public struct Config: Codable {
     }
 
     public static var initial: Config {
-        .init(wallets: [], fiatCurrency: .usd, securityConfirmation: .init(passcode: "", isBiometricEnabled: false))
+        .init(
+            wallets: [],
+            fiatCurrency: .usd,
+            securityConfirmation: .init(passcode: "", isBiometricEnabled: false)
+        )
     }
 }
 
@@ -53,6 +58,21 @@ public final class ConfigService {
     public init(storage: Storage) {
         let wrapper: StorageItemWrapper<Config> = storage
             .retrieve(with: .config, defaultValue: .initial, constrainTypeWith: .safe)
+
+        let actualConfigUUID: StorageItemWrapper<UUID> = storage
+            .retrieve(with: .configUUID, defaultValue: .init(), constrainTypeWith: .unsafe)
+
+        // remove old config from keychain if missed 
+        if wrapper.value.configUUID != actualConfigUUID.value {
+            let newConfigUUID = actualConfigUUID.value
+            var newConfig: Config = .initial
+            newConfig.configUUID = newConfigUUID
+
+            actualConfigUUID.value = newConfigUUID
+            wrapper.value = newConfig
+        } else {
+            try? storage.store(actualConfigUUID.value, withKey: .configUUID)
+        }
 
         self._config = wrapper
         self.configSubject = .init(wrapper.value)
@@ -90,10 +110,13 @@ extension ConfigService {
     }
 
     public func removeAllData() {
-        config = .initial
+        config.lastUsedWalletID = nil
+        config.wallets = []
     }
 }
 
 extension StorageKey {
     static var config: StorageKey { .init("config") }
+
+    static var configUUID: StorageKey { .init("configUUID") }
 }

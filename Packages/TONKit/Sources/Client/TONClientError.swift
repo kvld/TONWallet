@@ -12,6 +12,8 @@ extension TONClient {
 
     public struct ReachedMaxRetriesCountError: Swift.Error { }
 
+    public struct InvalidLiteServerError: Swift.Error { }
+
     public struct ParsingResponseError: Swift.Error {
         let expectedType: String
         let error: Swift.Error

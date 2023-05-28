@@ -48,6 +48,7 @@ struct SendConfirmView: View {
                         HStack(spacing: 0) {
                             Text("The comment is visible to everyone. You must include the note when sending to an exchange.")
                                 .multilineTextAlignment(.leading)
+                                .lineLimit(3)
                                 .fontConfiguration(.caption1)
                                 .foregroundColor(.text.secondary)
 
@@ -108,11 +109,23 @@ struct SendConfirmView: View {
 
                     Spacer(minLength: 88)
                 }
-                .frame(height: proxy.contentSize.height)
+                .frame(minHeight: proxy.contentSize.height)
             }
 
             VStack(spacing: 0) {
                 Spacer()
+
+                if let error = viewModel.state.error {
+                    AlertView(
+                        isPresented: .init(
+                            get: { viewModel.state.error != nil },
+                            set: { !$0 ? viewModel.state.error = nil : nil }
+                        ),
+                        title: error.title,
+                        message: error.error
+                    )
+                    .padding([.horizontal, .bottom], 16)
+                }
 
                 Button("Confirm and send") {
                     Task {

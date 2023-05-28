@@ -19,7 +19,10 @@ struct WizardInitialView: View {
             }
 
             isWalletLoading = true
-            viewModel.generateMnemonic()
+
+            Task {
+                await viewModel.generateMnemonic()
+            }
         }
         .buttonStyle(.action())
         .loading(isWalletLoading)

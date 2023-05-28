@@ -85,10 +85,16 @@ extension TONClient {
                 let result: Function.ReturnType = try await self.execute(function, uuid: uuid)
                 return result
             } catch {
-                if let error = error as? TONSchema.Error, error.code >= 500, error.message.starts(with: "LITE_SERVER_") {
-                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                if let error = error as? TONSchema.Error, error.code >= 500 {
+                    if error.message.contains("lt not in db") {
+                        throw InvalidLiteServerError()
+                    } else if error.message.starts(with: "LITE_SERVER_") {
+                        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
 
-                    delay *= 2
+                        delay *= 2
+                    } else {
+                        throw error
+                    }
                 } else {
                     throw error
                 }

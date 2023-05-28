@@ -21,7 +21,7 @@ public struct FormattedGram {
     }
 }
 
-public struct Nanogram {
+public struct Nanogram: Equatable {
     public let value: Int64
 
     public init(_ value: Int64) {

@@ -38,7 +38,6 @@ extension MainRouter: MainModuleOutput {
             return
         }
 
-
         let router = ReceiveRouter(parentNavigationRouter: parentNavigationRouter, walletInfo: walletInfo)
         parentNavigationRouter.present(router: router)
     }

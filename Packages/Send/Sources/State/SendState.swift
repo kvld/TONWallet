@@ -13,15 +13,34 @@ public struct SendState {
     public var isLoading: Bool = false
     public var balance: Nanogram?
     public var amount: Nanogram?
+    public var sendFullAmount = false
     public var hasInsufficientFunds = false
     public var fee: Nanogram?
     public var comment: String?
+    public var history: [HistoryEntry] = []
+    public var error: Error?
 
-    static func makeInitial(with predefinedParams: PredefinedStateParameters) -> SendState {
+    public struct Error {
+        public let title: String
+        public let error: String
+    }
+
+    public struct HistoryEntry {
+        public let address: String
+        public let domain: String?
+        public let date: String
+        fileprivate let _address: Address
+    }
+
+    static func makeInitial(
+        with predefinedParams: PredefinedStateParameters,
+        history: [HistoryEntry]
+    ) -> SendState {
         .init(
             address: predefinedParams.address.flatMap { .init($0) },
             amount: predefinedParams.amount.flatMap { .init(max(0, $0)) },
-            comment: predefinedParams.comment
+            comment: predefinedParams.comment,
+            history: history
         )
     }
 }
@@ -53,10 +72,14 @@ public struct PredefinedStateParameters {
 }
 
 public final class SendViewModel: ObservableObject {
+    private static var historyMaxCount: Int { 5 }
+
     private let tonService: TONService
     private let configService: ConfigService
     private let biometricService: BiometricService
     private let deeplinkService: DeeplinkService
+    private let historyService: SendHistoryService
+    private let sharedUpdateService: SharedUpdateService
 
     @Published public var state: SendState
 
@@ -67,13 +90,22 @@ public final class SendViewModel: ObservableObject {
         tonService: TONService,
         configService: ConfigService,
         biometricService: BiometricService,
-        deeplinkService: DeeplinkService
+        deeplinkService: DeeplinkService,
+        historyService: SendHistoryService,
+        sharedUpdateService: SharedUpdateService
     ) {
         self.tonService = tonService
-        self.state = .makeInitial(with: predefinedParameters)
+
+        self.state = .makeInitial(
+            with: predefinedParameters,
+            history: historyService.getHistory().prefix(Self.historyMaxCount).map(\.viewModel)
+        )
+
         self.configService = configService
         self.biometricService = biometricService
         self.deeplinkService = deeplinkService
+        self.historyService = historyService
+        self.sharedUpdateService = sharedUpdateService
     }
 }
 
@@ -102,16 +134,26 @@ extension SendViewModel {
             state.address = resolvedAddress
             state.domain = address
         } else {
+            let isAddressValid = (try? await tonService.isAddressValid(address)) ?? false
+            if !isAddressValid {
+                state.error = .init(title: "Invalid address", error: "Address entered does not belong to TON")
+                return
+            }
+
             state.address = .init(address)
         }
 
-        let walletState = try! await Task {
-            try await tonService.fetchWalletState(address: currentAddress)
-        }.value
+        do {
+            let walletState = try await Task {
+                try await tonService.fetchWalletState(address: currentAddress)
+            }.value
 
-        state.balance = walletState.balance
+            state.balance = walletState.balance
 
-        output?.showAmountInput()
+            output?.showAmountInput()
+        } catch {
+            state.error = .init(title: "Sending error", error: "Wallet is unavailable. Try again later")
+        }
     }
 
     @MainActor
@@ -133,6 +175,11 @@ extension SendViewModel {
     }
 
     @MainActor
+    public func updateAmount(useFullBalance: Bool) {
+        state.sendFullAmount = useFullBalance
+    }
+
+    @MainActor
     public func submit(amount: String) async {
         guard !state.hasInsufficientFunds, !state.isLoading, let value = amount.asDouble,
               let walletInfo = configService.config.lastUsedWallet,
@@ -150,12 +197,21 @@ extension SendViewModel {
 
         state.amount = amount
 
-        let queryID = try! await tonService.initQuery(walletInfo: walletInfo, destination: destination, amount: amount)
-        let fee = try! await tonService.getEstimatedFee(for: queryID)
+        do {
+            let queryID = try await tonService.initQuery(
+                walletInfo: walletInfo,
+                destination: destination,
+                amount: amount == state.balance ? .init(amount.value - 1) : amount // strange hack to prevent NOT_ENOUGH_FUNDS
+            )
 
-        state.fee = fee
+            let fee = try await tonService.getEstimatedFee(for: queryID)
 
-        output?.showConfirmInput()
+            state.fee = fee
+
+            output?.showConfirmInput()
+        } catch {
+            state.error = .init(title: "Sending error", error: "Unable to calculate transaction fee")
+        }
     }
 
     @MainActor
@@ -192,7 +248,9 @@ extension SendViewModel {
 
         output?.showTransactionWaiting()
 
-        _ = try! await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
+        _ = try? await tonService.pollForNewTransaction(sourceAddress: walletInfo.address)
+
+        sharedUpdateService.markAsTransactionListUpdateNeeded()
 
         output?.showTransactionCompleted()
     }
@@ -206,8 +264,27 @@ extension SendViewModel {
                 return
             }
 
-            self.state = .makeInitial(with: .init(address: address, amount: amount, comment: comment))
+            self.state = .makeInitial(
+                with: .init(address: address, amount: amount, comment: comment),
+                history: self.historyService.getHistory().prefix(Self.historyMaxCount).map(\.viewModel)
+            )
         }
+    }
+
+    @MainActor
+    public func clearHistory() {
+        historyService.clear()
+        state.history = []
+    }
+
+    @MainActor
+    public func fillWithHistoryEntry(with idx: Int) {
+        let entry = state.history[idx]
+
+        self.state = .makeInitial(
+            with: .init(address: entry._address.value),
+            history: self.historyService.getHistory().prefix(Self.historyMaxCount).map(\.viewModel)
+        )
     }
 
     // MARK: - Private
@@ -221,23 +298,46 @@ extension SendViewModel {
 
         state.isLoading = true
 
-        let queryID = try! await tonService.initQuery(
-            walletInfo: walletInfo,
-            destination: destination,
-            amount: amount,
-            message: state.comment
-        )
+        do {
+            let queryID = try await tonService.initQuery(
+                walletInfo: walletInfo,
+                destination: destination,
+                amount: amount,
+                message: state.comment
+            )
 
-        try! await tonService.sendQuery(with: queryID)
+            try await tonService.sendQuery(with: queryID)
 
-        state.isLoading = false
+            historyService.add(entry: .init(address: destination, domain: state.domain, date: .init()))
 
-        await showWaitingState()
+            state.isLoading = false
+
+            await showWaitingState()
+        } catch {
+            state.error = .init(title: "Sending error", error: "Try again later")
+            state.isLoading = false
+        }
     }
 }
 
 extension String {
     fileprivate var asDouble: Double? {
         Double(replacingOccurrences(of: ",", with: "."))
+    }
+}
+
+extension SendHistoryEntry {
+    fileprivate var viewModel: SendState.HistoryEntry {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .short
+        formatter.locale = .init(identifier: "en_US")
+
+        return .init(
+            address: address.shortened(partLength: 4),
+            domain: domain,
+            date: formatter.string(from: date),
+            _address: address
+        )
     }
 }

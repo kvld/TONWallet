@@ -9,12 +9,14 @@ import SwiftUI
 final class WizardReadyRouter: HostingRouter<AnyView, WizardInfoModule> {
     var canDismissInteractively: Bool { false }
 
-    init(onClose: @escaping () -> Void) {
+    init(afterImport: Bool, onClose: @escaping () -> Void) {
         let module = WizardInfoModule(
             model: .init(
-                animationName: "start",
-                title: "Ready to go!",
-                text: "You are all set. Now you have a wallet that only you control — directly, without middlemen or bankers.",
+                animationName: afterImport ? "congratulations" : "start",
+                title: afterImport ? "Your wallet has just been imported!" : "Ready to go!",
+                text: afterImport
+                    ? ""
+                    : "You are all set. Now you have a wallet that only you control — directly, without middlemen or bankers.",
                 primaryButton: Self.makePrimaryButton(onClose: onClose),
                 secondaryButton: nil
             )

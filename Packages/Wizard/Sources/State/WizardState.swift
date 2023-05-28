@@ -15,6 +15,7 @@ public struct WizardState {
     internal(set) public var walletInfo: WalletInfo?
     internal(set) public var supportedBiometricType: BiometricType?
     internal(set) public var isBiometricEnabled: Bool
+    internal(set) public var isWalletAfterImport: Bool
 
     public var mnemonicWords: [String] {
         walletInfo?.credentials.mnemonicWords ?? []
@@ -28,7 +29,8 @@ public struct WizardState {
     static var initial: WizardState = .init(
         mnemonicGoToTestAttempts: 0,
         mnemonicTestWordsIndices: [],
-        isBiometricEnabled: false
+        isBiometricEnabled: false,
+        isWalletAfterImport: false
     )
 }
 
@@ -42,7 +44,7 @@ public protocol WizardViewModelOutput: AnyObject {
     func showFailedTestAlert()
     func showPasscodeConfirmation()
     func showBiometric()
-    func showFinal()
+    func showFinal(afterImport: Bool)
     func showImport()
     func showImportSomeWordsEmptyAlert()
     func showImportWrongWordAlert()
@@ -67,20 +69,17 @@ public final class WizardViewModel: ObservableObject {
 }
 
 extension WizardViewModel {
-    public func generateMnemonic() {
-        Task {
-            do {
-                let walletInfo = try await tonService.createWallet()
+    public func generateMnemonic() async {
+        do {
+            let walletInfo = try await tonService.createWallet()
 
-                await MainActor.run {
-                    state.walletInfo = walletInfo
-                }
-
-                await output?.showCongratulations()
-            } catch {
-                // TODO: error
-                print("DD ->", error)
+            await MainActor.run {
+                state.walletInfo = walletInfo
             }
+
+            await output?.showCongratulations()
+        } catch {
+            assertionFailure("Error while creating wallet: \(error)")
         }
     }
 
@@ -141,7 +140,7 @@ extension WizardViewModel {
 
         if value == currentPasscode {
             if !biometricService.isSupportBiometric {
-                try! completeWizard()
+                completeWizard()
             } else {
                 state.supportedBiometricType = biometricService.isSupportFaceID ? .faceID : .touchID
                 output?.showBiometric()
@@ -189,10 +188,11 @@ extension WizardViewModel {
         do {
             let walletInfo = try await tonService.importWallet(mnemonicWords: allWords)
             state.walletInfo = walletInfo
+            state.isWalletAfterImport = true
 
             output?.showPasscodeSetUp()
         } catch {
-            // TODO:
+            assertionFailure("Error while importing wallet: \(error)")
         }
     }
 
@@ -202,12 +202,12 @@ extension WizardViewModel {
             .evaluate(withLocalizedReason: "TON Wallet uses biometric authentication to authorize transactions.")
 
         state.isBiometricEnabled = result
-        try? completeWizard()
+        completeWizard()
     }
 
     @MainActor
     public func skipBiometric() {
-        try? completeWizard()
+        completeWizard()
     }
 
     @MainActor
@@ -231,7 +231,7 @@ extension WizardViewModel {
     }
 
     @MainActor
-    private func completeWizard() throws {
+    private func completeWizard() {
         guard let walletInfo = state.walletInfo, let passcode = state.passcode else {
             assertionFailure("Inconsistent state: wallet and passcode info should be in the state")
             return
@@ -240,6 +240,6 @@ extension WizardViewModel {
         configService.updateSecurityInformation(passcode: passcode, isBiometricEnabled: state.isBiometricEnabled)
         configService.updateWallet(with: walletInfo)
         
-        output?.showFinal()
+        output?.showFinal(afterImport: state.isWalletAfterImport)
     }
 }

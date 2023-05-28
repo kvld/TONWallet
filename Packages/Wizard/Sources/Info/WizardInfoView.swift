@@ -27,6 +27,7 @@ public struct WizardInfoView: View {
                         .padding(.bottom, 20)
 
                     Text(model.title)
+                        .multilineTextAlignment(.center)
                         .fontConfiguration(.title1)
                         .foregroundColor(.text.primary)
                         .padding(.bottom, 12)

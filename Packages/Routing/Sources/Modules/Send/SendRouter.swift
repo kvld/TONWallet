@@ -25,7 +25,9 @@ final class SendRouter: Router, SendViewModelOutput {
             tonService: resolve(),
             configService: resolve(),
             biometricService: resolve(),
-            deeplinkService: resolve()
+            deeplinkService: resolve(),
+            historyService: resolve(),
+            sharedUpdateService: resolve()
         )
 
         let navigationRouter = NavigationRouter { controller in
@@ -54,12 +56,28 @@ final class SendRouter: Router, SendViewModelOutput {
     }
 
     func showTransactionWaiting() {
-        let sendConfirmRouter = SendCompletionRouter(stage: .waiting, viewModel: viewModel)
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let sendConfirmRouter = SendCompletionRouter(
+            stage: .waiting,
+            viewModel: viewModel,
+            parentNavigationRouter: parentNavigationRouter
+        )
         _navigationRouter.push(router: sendConfirmRouter)
     }
 
     func showTransactionCompleted() {
-        let sendConfirmRouter = SendCompletionRouter(stage: .completed, viewModel: viewModel)
+        guard let parentNavigationRouter else {
+            return
+        }
+
+        let sendConfirmRouter = SendCompletionRouter(
+            stage: .completed,
+            viewModel: viewModel,
+            parentNavigationRouter: parentNavigationRouter
+        )
         _navigationRouter.push(router: sendConfirmRouter)
     }
 

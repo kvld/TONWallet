@@ -25,9 +25,9 @@ public final class TransactionModule {
         }
     }
     
-    public init(transaction: TON.Transaction) {
+    public init(transaction: TON.Transaction, onClose: @escaping () -> Void) {
         let viewModel = TransactionViewModel(transaction: transaction)
-        self.view = TransactionView(viewModel: viewModel).eraseToAnyView()
+        self.view = TransactionView(viewModel: viewModel, onClose: onClose).eraseToAnyView()
         self.viewModel = viewModel
     }
 }

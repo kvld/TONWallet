@@ -14,10 +14,11 @@ import CryptoKit
 public final class TONService {
     public typealias QueryHashType = Bytes
 
-    private let _client: TONClient
+    private var _client: TONClient
     private var _configInfo = CurrentValueSubject<OptionsConfigInfo?, Never>(nil)
 
     private var cachedDNSRootAddress: Address?
+    private var cachedConfig: String?
 
     private let configURL: URL
 
@@ -41,11 +42,10 @@ public final class TONService {
     }
 
     public init(
-        client: TONClient = .init(),
         storage: Storage,
         configURL: URL
     ) {
-        self._client = client
+        self._client = .init()
         self.configURL = configURL
 
         Task {
@@ -54,14 +54,27 @@ public final class TONService {
     }
 
     private func loadConfig() async throws {
-        let configData = try await URLSession.shared.data(from: configURL).0
+        let config: String
+        if let cachedConfig {
+            config = cachedConfig
+        } else {
+            let configData = try await URLSession.shared.data(from: configURL).0
+
+            guard let _config = String(data: configData, encoding: .utf8) else {
+                assertionFailure("Invalid config data")
+                return
+            }
+
+            config = _config
+            cachedConfig = config
+        }
 
         let keystoreDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
         let initRequest = Init(
             options: .init(
                 config: .init(
-                    config: String(data: configData, encoding: .utf8)!,
+                    config: config,
                     blockchainName: "",
                     useCallbacksForNetwork: false,
                     ignoreCache: false
@@ -81,6 +94,11 @@ public final class TONService {
 }
 
 extension TONService {
+    public func reloadConfig() async throws {
+        _client = .init()
+        try await loadConfig()
+    }
+
     public func createWallet() async throws -> WalletInfo {
         let createKeyRequest = CreateNewKey(
             localPassword: .init(),
@@ -289,6 +307,7 @@ extension TONService {
         walletInfo: WalletInfo,
         destination: Address,
         amount: Nanogram,
+        sendMode: Int32 = 3,
         message: String? = nil
     ) async throws -> Swift.Int64 {
         let rawAccount = try await client.execute(
@@ -335,7 +354,7 @@ extension TONService {
                             publicKey: walletInfo.credentials.publicKey.encryptedKey,
                             amount: .init(amount.value),
                             data: .msgDataText(.init(text: message)),
-                            sendMode: 3
+                            sendMode: sendMode
                         )
                     ],
                     allowSendToUninited: true
@@ -397,5 +416,19 @@ extension TONService {
     public func getMnemonicSuggestions(prefix: String) async throws -> [String] {
         let response = try await client.execute(GetBip39Hints(prefix: prefix))
         return response.words
+    }
+
+    public func isAddressValid(_ address: String) async throws -> Bool {
+        do {
+            _ = try await client.execute(UnpackAccountAddress(accountAddress: address))
+            return true
+        } catch {
+            if let error = error as? TONSchema.Error, error.message.contains("INVALID_ACCOUNT_ADDRESS") {
+                return false
+            }
+
+            throw error
+        }
+
     }
 }

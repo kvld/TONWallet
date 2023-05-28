@@ -130,8 +130,8 @@ public struct ScreenContainer<Content: View>: View {
                                     || navigationBarTitleAlwaysVisible,
                                 leftButton: navigationBarLeftButton,
                                 rightButton: navigationBarRightButton,
-                                onLeftButton: navigationBarOnLeftButtonTap,
-                                onRightButton: navigationBarOnRightButtonTap
+                                onLeftButtonTap: navigationBarOnLeftButtonTap,
+                                onRightButtonTap: navigationBarOnRightButtonTap
                             )
                         } else {
                             EmptyView()
@@ -171,23 +171,23 @@ public struct NavigationBar: View {
     let isTitleVisible: Bool
     let leftButton: NavigationBarButton?
     let rightButton: NavigationBarButton?
-    let onLeftButton: (() -> Void)?
-    let onRightButton: (() -> Void)?
+    let onLeftButtonTap: (() -> Void)?
+    let onRightButtonTap: (() -> Void)?
 
     public init(
         title: String?,
         isTitleVisible: Bool,
         leftButton: NavigationBarButton?,
         rightButton: NavigationBarButton?,
-        onLeftButton: (() -> Void)? = nil,
-        onRightButton: (() -> Void)? = nil
+        onLeftButtonTap: (() -> Void)? = nil,
+        onRightButtonTap: (() -> Void)? = nil
     ) {
         self.title = title
         self.isTitleVisible = isTitleVisible
         self.leftButton = leftButton
         self.rightButton = rightButton
-        self.onLeftButton = onLeftButton
-        self.onRightButton = onRightButton
+        self.onLeftButtonTap = onLeftButtonTap
+        self.onRightButtonTap = onRightButtonTap
     }
 
     public var body: some View {
@@ -220,8 +220,8 @@ public struct NavigationBar: View {
                     }
                 }
                 .onTapWithFeedback {
-                    if let onLeftButton {
-                        onLeftButton()
+                    if let onLeftButtonTap {
+                        onLeftButtonTap()
                     } else {
                         presentationMode.wrappedValue.dismiss()
                     }
@@ -266,8 +266,8 @@ public struct NavigationBar: View {
                     }
                 }
                 .onTapWithFeedback {
-                    if let onRightButton {
-                        onRightButton()
+                    if let onRightButtonTap {
+                        onRightButtonTap()
                     } else {
                         presentationMode.wrappedValue.dismiss()
                     }

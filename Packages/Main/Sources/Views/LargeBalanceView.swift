@@ -33,7 +33,7 @@ struct LargeBalanceView: View {
                             .fontConfiguration(.rounded.balanceLarge)
                         
                         if let balanceFraction {
-                            Text(String(balanceFraction).prefix(3))
+                            Text(String(balanceFraction).prefix(4))
                                 .fontConfiguration(.rounded.balanceSmall)
                                 .padding(.top, 13)
                         }

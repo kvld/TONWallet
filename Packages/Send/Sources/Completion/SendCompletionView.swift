@@ -11,11 +11,13 @@ import AnimationView
 struct SendCompletionView: View {
     let stage: SendCompletionStage
     @ObservedObject var viewModel: SendViewModel
+    let onClose: () -> Void
 
     var body: some View {
         ScreenContainer(
             navigationBarLeftButton: nil,
             navigationBarRightButton: .done,
+            navigationBarOnRightButtonTap: onClose,
             extendBarHeight: true
         ) { proxy in
             ZStack(alignment: .bottom) {
@@ -74,12 +76,10 @@ struct SendCompletionView: View {
                 VStack(spacing: 0) {
                     Spacer()
 
-                    Button("View my wallet") {
-
-                    }
-                    .buttonStyle(.action())
-                    .loading(viewModel.state.isLoading)
-                    .padding(.horizontal, 16)
+                    Button("View my wallet", action: onClose)
+                        .buttonStyle(.action())
+                        .loading(viewModel.state.isLoading)
+                        .padding(.horizontal, 16)
 
                     DeviceRelatedBottomSpacer()
                 }

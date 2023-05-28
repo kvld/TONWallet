@@ -37,11 +37,6 @@ struct SendAmountView: View {
                         }
 
                         Spacer()
-
-                        Text("Edit")
-                            .onTapWithFeedback {
-
-                            }
                     }
                     .fontConfiguration(.body.regular)
                     .frame(height: 44)
@@ -102,6 +97,18 @@ struct SendAmountView: View {
                 VStack(spacing: 0) {
                     Spacer()
 
+                    if let error = viewModel.state.error {
+                        AlertView(
+                            isPresented: .init(
+                                get: { viewModel.state.error != nil },
+                                set: { !$0 ? viewModel.state.error = nil : nil }
+                            ),
+                            title: error.title,
+                            message: error.error
+                        )
+                        .padding([.horizontal, .bottom], 16)
+                    }
+
                     HStack(spacing: 2) {
                         Text("Send all")
                             .fontConfiguration(.body.regular)
@@ -143,6 +150,8 @@ struct SendAmountView: View {
             viewModel.updateAmount(with: newAmount)
         }
         .onChange(of: useFullBalance) { useFullBalance in
+            viewModel.updateAmount(useFullBalance: useFullBalance)
+
             if let balance = viewModel.state.balance?.formatted.formatted {
                 amount = useFullBalance ? balance : ""
             }

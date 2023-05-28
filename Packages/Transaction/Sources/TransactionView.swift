@@ -8,11 +8,18 @@ import Components
 
 struct TransactionView: View {
     @ObservedObject var viewModel: TransactionViewModel
+    let onClose: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationBar(title: "Transaction", isTitleVisible: true, leftButton: nil, rightButton: .done)
-                .frame(height: 56)
+            NavigationBar(
+                title: "Transaction",
+                isTitleVisible: true,
+                leftButton: nil,
+                rightButton: .done,
+                onRightButtonTap: onClose
+            )
+            .frame(height: 56)
 
             HStack(spacing: 4) {
                 Image("ton")

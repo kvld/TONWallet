@@ -45,6 +45,14 @@ final class ServiceLocator {
         register {
             ConversionRateService()
         }
+
+        register {
+            SendHistoryService(storage: resolve())
+        }
+
+        register {
+            SharedUpdateService()
+        }
     }
 }
 

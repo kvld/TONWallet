@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import TON
+import TONClient
 import CommonServices
 import Combine
 
@@ -78,10 +79,25 @@ final class MainViewModel: ObservableObject {
 
     @Published var state: MainViewState = .preparing(didPresentWizard: false)
 
-    init(configService: ConfigService, tonService: TONService, conversionRateService: ConversionRateService) {
+    init(
+        configService: ConfigService,
+        tonService: TONService,
+        conversionRateService: ConversionRateService,
+        sharedUpdateService: SharedUpdateService
+    ) {
         self.configService = configService
         self.tonService = tonService
         self.conversionRateService = conversionRateService
+
+        bindForUpdate(sharedUpdateService: sharedUpdateService)
+    }
+
+    private func bindForUpdate(sharedUpdateService: SharedUpdateService) {
+        sharedUpdateService.transactionListUpdateNeeded.sink { [weak self] _ in
+            Task { [weak self] in
+                await self?.loadTransactionsAndBalance()
+            }
+        }.store(in: &cancellables)
     }
 }
 
@@ -186,8 +202,12 @@ extension MainViewModel {
             state = .idle(model)
             paginationState = .init(isInLoading: false, lastTransactionID: transactions.lastTransaction)
         } catch {
-            print("[ERROR]", error)
-            // TODO: error
+            if error is TONClient.InvalidLiteServerError {
+                try? await tonService.reloadConfig()
+                await loadTransactionsAndBalance()
+            }
+            
+            print("[Transactions load error]", error)
         }
     }
 
@@ -253,7 +273,12 @@ extension MainViewModel {
                 state = result.1
             }
         } catch {
-            // todo: retry
+            if error is TONClient.InvalidLiteServerError {
+                try? await tonService.reloadConfig()
+                await loadMoreTransactions()
+            }
+
+            print("[Transactions load error]", error)
         }
     }
 
@@ -290,6 +315,7 @@ extension MainViewState.FiatBalance {
 
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
+        formatter.currencyCode = currency.rawValue
         formatter.maximumFractionDigits = 2
 
         return .init(value: formatter.string(from: value as NSNumber) ?? "\(value) \(currency.rawValue)")

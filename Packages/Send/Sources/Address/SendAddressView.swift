@@ -14,14 +14,14 @@ struct SendAddressView: View {
     @State private var address: String = ""
 
     var body: some View {
-        ScreenContainer(
-            navigationBarTitle: "Send TON",
-            navigationBarTitleAlwaysVisible: true,
-            navigationBarLeftButton: .cancel,
-            navigationBarOnLeftButtonTap: onClose,
-            extendBarHeight: true
-        ) { proxy in
-            ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottom) {
+            ScreenContainer(
+                navigationBarTitle: "Send TON",
+                navigationBarTitleAlwaysVisible: true,
+                navigationBarLeftButton: .cancel,
+                navigationBarOnLeftButtonTap: onClose,
+                extendBarHeight: true
+            ) { proxy in
                 VStack(alignment: .leading, spacing: 0) {
                     AddressInputView(text: $address)
                         .padding(.horizontal, 16)
@@ -65,33 +65,58 @@ struct SendAddressView: View {
                     }
                     .padding(.horizontal, 16)
 
-                    Spacer()
-                }
-
-                VStack {
-                    Spacer()
-
-                    Button("Continue") {
-                        Task {
-                            await viewModel.submit(address: address)
+                    if !viewModel.state.history.isEmpty {
+                        HistoryView(history: viewModel.state.history) {
+                            viewModel.clearHistory()
+                        } onAddressSelect: { idx in
+                            viewModel.fillWithHistoryEntry(with: idx)
                         }
+                        .padding(.top, 22)
+                        .padding(.bottom, 64)
                     }
-                    .buttonStyle(.action())
-                    .loading(viewModel.state.isLoading)
-                    .padding(.horizontal, 16)
 
-                    DeviceRelatedBottomSpacer()
+                    Spacer()
                 }
+                .frame(minHeight: proxy.contentSize.height)
             }
-            .frame(height: proxy.contentSize.height)
+
+            VStack(spacing: 0) {
+                Spacer()
+
+                if let error = viewModel.state.error {
+                    AlertView(
+                        isPresented: .init(
+                            get: { viewModel.state.error != nil },
+                            set: { !$0 ? viewModel.state.error = nil : nil }
+                        ),
+                        title: error.title,
+                        message: error.error
+                    )
+                    .padding([.horizontal, .bottom], 16)
+                }
+
+                Button("Continue") {
+                    Task {
+                        await viewModel.submit(address: address)
+                    }
+                }
+                .buttonStyle(.action())
+                .loading(viewModel.state.isLoading)
+                .padding(.horizontal, 16)
+
+                DeviceRelatedBottomSpacer()
+            }
         }
         .onAppear {
             address = viewModel.state.address?.value ?? ""
         }
+        .onChange(of: viewModel.state.address) { newValue in
+            address = newValue?.value ?? ""
+        }
     }
 }
 
-struct AddressInputView: View {
+private struct AddressInputView: View {
     @Binding var text: String
     @State private var textEditorHeight: CGFloat = 0
 
@@ -129,7 +154,7 @@ struct AddressInputView: View {
     }
 }
 
-struct _TextEditor: UIViewRepresentable {
+private struct _TextEditor: UIViewRepresentable {
     @Binding var text: String
     @Binding var height: CGFloat
 
@@ -199,5 +224,74 @@ struct _TextEditor: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text, height: $height)
+    }
+}
+
+private struct HistoryView: View {
+    let history: [SendState.HistoryEntry]
+    let onClearTap: () -> Void
+    let onAddressSelect: (Int) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                HStack {
+                    Text("Recents".uppercased())
+                        .foregroundColor(.text.secondary)
+                        .fontConfiguration(.footnote)
+                    Spacer()
+                    Text("Clear".uppercased())
+                        .foregroundColor(.accent.app)
+                        .fontConfiguration(.footnote)
+                        .onTapWithFeedback(action: onClearTap)
+                }
+                .padding(.bottom, 4)
+            }
+            .frame(height: 44)
+            .padding(.horizontal, 16)
+
+            ForEach(Array(history.enumerated()), id: \.offset) { (idx, item) in
+                VStack(alignment: .leading, spacing: 2) {
+                    Spacer(minLength: 0)
+
+                    HStack(spacing: 0) {
+                        Group {
+                            if let domain = item.domain {
+                                Text(domain)
+                            } else {
+                                Text(item.address)
+                            }
+                        }
+
+                        Spacer(minLength: 0)
+                    }
+                    .foregroundColor(.text.primary)
+                    .padding(.horizontal, 16)
+
+                    Group {
+                        if item.domain != nil {
+                            Text(item.address)
+                        } else {
+                            Text(item.date)
+                        }
+                    }
+                    .foregroundColor(.text.secondary)
+                    .padding(.horizontal, 16)
+
+                    Spacer(minLength: 0)
+                }
+                .fontConfiguration(.body.regular)
+                .frame(height: 60)
+                .frame(maxWidth: .infinity)
+                .onTapWithHighlight {
+                    onAddressSelect(idx)
+                }
+
+                if idx != history.count - 1 {
+                    Divider().foregroundColor(Color.separator).padding(.leading, 16)
+                }
+            }
+        }
     }
 }
